@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 # kbb aka kernel build bot
+# but not referred to with the full name,
+# since there's many a "kernel build bot" out there...
+# but I dont have a name really, so ... kbb.py it is.
 
 import os
 import sys
@@ -37,6 +40,8 @@ def subc(*args, **kwargs):
         sys.exit(1)
     return c.stdout
 
+def versplit(ver):
+    return [int(x) if x.isdigit() else x for x in ver.split(sep=".")]
 
 url = "https://www.kernel.org/releases.json"
 
@@ -60,7 +65,7 @@ update_mainline = False
 for r in rels["releases"]:
     if not r["version"][0].isdigit():
         continue
-    verno = [int(x) if x.isdigit() else x for x in r["version"].split(sep=".")]
+    verno = versplit(r["version"])
     print(r["moniker"], verno)
     found = False
     for o in prevs["releases"]:
@@ -74,7 +79,7 @@ for r in rels["releases"]:
             break
         if o["moniker"] == "mainline":
             continue
-        oldver = [int(x) for x in o["version"].split(sep=".")]
+        oldver = versplit(o["version"])
         if oldver[0:2] == verno[0:2]:
             found = True
             if o["version"] != r["version"]:
@@ -106,30 +111,47 @@ if update_stable or update_mainline:
 kernel_c201ml = {
     "dir": "linux-kbb-c201",
     "patchset": "c201",
-    "patches": 14,
     "build": "./makepkg-c201-test.sh",
     "verpolicy": "mainline",
 }
 
-# Calling rebase and tag "repatch" ... ok.
-def repatch_indir(patchset, patches, newver):
-    kbbpatchcnt = ".kbb_patchcount"
+def tag_exists(tag):
+    return sub(
+        ["git", "rev-parse", "refs/tags/" + tag], stdout=DEVNULL, stderr=DEVNULL
+    )
 
+# Calling rebase and tag "repatch" ... ok.
+def repatch_indir(patchset, newver, verpolicy):
     tagname = patchset + "-" + newver
     if os.path.exists(".skipkbb"):
         return False
 
-    if sub(
-        ["git", "rev-parse", "refs/tags/" + tagname], stdout=DEVNULL, stderr=DEVNULL
-    ):
+    if tag_exists(tagname):
         return tagname
 
-    if os.path.exists(kbbpatchcnt):
-        with open(kbbpatchcnt) as f:
-            patches = int(f.read())
+    oldtag = subc(["git", "describe", "--tags"], stdout=PIPE)
+    (oldset, oldver) = oldtag.split(sep="-", maxsplit=1)
+
+    if verpolicy != "mainline":
+        newno = versplit(newver)
+        oldno = versplit(oldver)
+        if newno[0:2] != oldno[0:2]:
+            mlvertag = patchset + "-" + str(newno[0]) + '.' + str(newno[1])
+            if tag_exists(mlvertag):
+                branchname = subc(["git", "branch", "--show-current"], stdout=PIPE).decode().strip()
+                subc(["git", "switch", "-C", branchname, "refs/tags/" + mlvertag])
+                (oldset, oldver) = mlvertag.split(sep="-", maxsplit=1)
+
+    if oldset != patchset:
+        print("Error: this git tree is on a tag for patchset {oldset}, not {patchset}?")
+        return False
+
+    oldvertag = "tags/v" + oldver
+
+    patches = subc(["git", "rev-list", "--count", oldvertag + "..HEAD"], stdout=PIPE)
+    patches = int(patches.decode())
 
     vertag = "tags/v" + newver
-
     if not sub(["git", "rebase", "HEAD~" + str(patches), "--onto", vertag]):
         print(
             "Finish rebase manually. Use 'touch .skipkbb' to skip this kernel for now instead."
@@ -143,18 +165,16 @@ def repatch_indir(patchset, patches, newver):
     count = int(count.decode())
     if count != patches:
         print(
-            f"Warning: patchset {patchset} now (version {newver}) has {count} patches!"
+            f"Info: patchset {patchset} now (version {newver}) has {count} patches."
         )
-        with open(kbbpatchcnt, "w") as f:
-            f.write(str(count))
 
     subc(["git", "tag", tagname])
     return tagname
 
 
-def repatch(dir, patchset, patches, newver):
+def repatch(dir, patchset, newver, verpolicy):
     os.chdir(dir)
-    r = repatch_indir(patchset, patches, newver)
+    r = repatch_indir(patchset, newver, verpolicy)
     os.chdir("..")
     return r
 
@@ -168,7 +188,7 @@ def doakernel(k):
         else:
             return
     elif vp == "stable":
-        if rels["latest_stable"] in update_stable:
+        if rels["latest_stable"]["version"] in update_stable:
             vp = rels["latest_stable"]
         else:
             return
@@ -180,7 +200,7 @@ def doakernel(k):
         return
     kname = k["patchset"] + "-" + vp
     print(f"Re/patching {kname} to version {nv}")
-    tag = repatch(k["dir"], k["patchset"], k["patches"], nv)
+    tag = repatch(k["dir"], k["patchset"], nv, vp)
     if not tag:
         print("No tag returned - skipping build")
         return
