@@ -1,4 +1,5 @@
 c201-test/
-linux/
+linux*/
 x-tools*
 *releases.json
+*.log
