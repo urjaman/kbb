@@ -3,3 +3,4 @@ linux*/
 x-tools*
 *releases.json
 *.log
+kbb.lock

@@ -33,7 +33,7 @@ def subc(*args, **kwargs):
     c = subprocess.run(*args, **kwargs)
     if c.returncode != 0:
         print("subprocess failed: ", args)
-        print("code:", c)
+        print("code:", c.returncode)
         sys.exit(1)
     return c.stdout
 
@@ -194,6 +194,8 @@ def doakernel(k):
             print("Done. Return value zero (y).")
         else:
             print("Oopsie? Build ended with nonzero return value :(")
+            with open("ATTN.txt","a") as of:
+                of.write(logfn + '\n')
 
 
 doakernel(kernel_c201ml)
