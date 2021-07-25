@@ -104,7 +104,7 @@ if update_stable or update_mainline:
     if update_stable:
         print("Fetching stable(s)")
         targets = ["tags/v" + x for x in update_stable]
-        subc(["git", "fetch", "stable"] + targets)
+        subc(["git", "fetch", "--tags", "stable"] + targets)
         print("Done")
     os.chdir("..")
 
@@ -122,7 +122,7 @@ def repatch_indir(patchset, newver, verpolicy):
     if tag_exists(tagname):
         return tagname
 
-    oldtag = subc(["git", "describe", "--tags"], stdout=PIPE)
+    oldtag = subc(["git", "describe", "--tags"], stdout=PIPE).decode().strip()
     (oldset, oldver) = oldtag.split(sep="-", maxsplit=1)
 
     if verpolicy != "mainline":
