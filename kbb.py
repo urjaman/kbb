@@ -108,13 +108,6 @@ if update_stable or update_mainline:
         print("Done")
     os.chdir("..")
 
-kernel_c201ml = {
-    "dir": "linux-kbb-c201",
-    "patchset": "c201",
-    "build": "./makepkg-c201-test.sh",
-    "verpolicy": "mainline",
-}
-
 def tag_exists(tag):
     return sub(
         ["git", "rev-parse", "refs/tags/" + tag], stdout=DEVNULL, stderr=DEVNULL
@@ -189,7 +182,7 @@ def doakernel(k):
             return
     elif vp == "stable":
         if rels["latest_stable"]["version"] in update_stable:
-            vp = rels["latest_stable"]
+            nv = rels["latest_stable"]["version"]
         else:
             return
     else:
@@ -218,7 +211,23 @@ def doakernel(k):
                 of.write(logfn + '\n')
 
 
+kernel_c201ml = {
+    "dir": "linux-kbb-c201",
+    "patchset": "c201",
+    "build": "./makepkg-c201-test.sh",
+    "verpolicy": "mainline",
+}
+
+kernel_c201_stable = {
+    "dir": "linux-kbb-c201-stable",
+    "patchset": "c201",
+    "build": "./makepkg-c201-stable.sh",
+    "verpolicy": "stable",
+}
+
+
 doakernel(kernel_c201ml)
+doakernel(kernel_c201_stable)
 
 # finally, move releases to prev
 os.replace(curr_fn, prev_releases)
