@@ -40,8 +40,10 @@ def subc(*args, **kwargs):
         sys.exit(1)
     return c.stdout
 
+
 def versplit(ver):
     return [int(x) if x.isdigit() else x for x in ver.split(sep=".")]
+
 
 url = "https://www.kernel.org/releases.json"
 
@@ -108,10 +110,10 @@ if update_stable or update_mainline:
         print("Done")
     os.chdir("..")
 
+
 def tag_exists(tag):
-    return sub(
-        ["git", "rev-parse", "refs/tags/" + tag], stdout=DEVNULL, stderr=DEVNULL
-    )
+    return sub(["git", "rev-parse", "refs/tags/" + tag], stdout=DEVNULL, stderr=DEVNULL)
+
 
 # Calling rebase and tag "repatch" ... ok.
 def repatch_indir(patchset, newver, verpolicy):
@@ -129,9 +131,13 @@ def repatch_indir(patchset, newver, verpolicy):
         newno = versplit(newver)
         oldno = versplit(oldver)
         if newno[0:2] != oldno[0:2]:
-            mlvertag = patchset + "-" + str(newno[0]) + '.' + str(newno[1])
+            mlvertag = patchset + "-" + str(newno[0]) + "." + str(newno[1])
             if tag_exists(mlvertag):
-                branchname = subc(["git", "branch", "--show-current"], stdout=PIPE).decode().strip()
+                branchname = (
+                    subc(["git", "branch", "--show-current"], stdout=PIPE)
+                    .decode()
+                    .strip()
+                )
                 subc(["git", "switch", "-C", branchname, "refs/tags/" + mlvertag])
                 (oldset, oldver) = mlvertag.split(sep="-", maxsplit=1)
 
@@ -157,9 +163,7 @@ def repatch_indir(patchset, newver, verpolicy):
     count = subc(["git", "rev-list", "--count", vertag + "..HEAD"], stdout=PIPE)
     count = int(count.decode())
     if count != patches:
-        print(
-            f"Info: patchset {patchset} now (version {newver}) has {count} patches."
-        )
+        print(f"Info: patchset {patchset} now (version {newver}) has {count} patches.")
 
     subc(["git", "tag", tagname])
     return tagname
@@ -207,8 +211,8 @@ def doakernel(k):
             print("Done. Return value zero (y).")
         else:
             print("Oopsie? Build ended with nonzero return value :(")
-            with open("ATTN.txt","a") as of:
-                of.write(logfn + '\n')
+            with open("ATTN.txt", "a") as of:
+                of.write(logfn + "\n")
 
 
 kernel_c201ml = {
