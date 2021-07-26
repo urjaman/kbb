@@ -204,7 +204,7 @@ def doakernel(k):
     today = datetime.date.today()
     ymd = today.strftime("%y%m%d")
     pids = str(os.getpid())
-    logfn = "log/kbb-build-" + kname + "-" + ymd + "-v" + nv + " " + pids + ".log"
+    logfn = "log/build-" + kname + "-" + ymd + "-v" + nv + " " + pids + ".log"
     print(f"Building - for details see '{logfn}'")
     with open(logfn, "w") as f:
         if sub([k["build"], tag], stdin=DEVNULL, stderr=STDOUT, stdout=f):
