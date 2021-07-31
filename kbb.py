@@ -15,6 +15,51 @@ import subprocess
 import time
 import datetime
 from subprocess import DEVNULL, PIPE, STDOUT
+from email.message import EmailMessage
+
+
+whoami = 'KBB <kbb@urja.dev>'
+toaddr = 'urja@urja.dev'
+emailproc = ['ssh', 'kbb@urja.dev', 'sendmail', '-t']
+
+def htmlize(s):
+    escapes = {
+        '&': '&amp;',
+        '>': '&gt;',
+        '<': '&lt;'
+    }
+    prefix = '<html><head></head><body><pre>\n'
+    suffix = '</pre></body></html>\n'
+    for k in escapes:
+        s = s.replace(k, escapes[k])
+    return prefix + s + suffix
+
+def mail(subj, logfn = None, log = None):
+    if logfn:
+        with open(logfn) as f:
+            log = f.read()
+
+    attach_threshold = 25
+    msg = EmailMessage()
+    msg['Subject'] = '[KBB] ' + subj
+    msg['From'] = whoami
+    msg['To'] = toaddr
+
+    if log.count('\n') > attach_threshold:
+        attach = log;
+        log = log.splitlines()
+        log = log[-attach_threshold:]
+        log = '<snip>\n' + '\n'.join(log) + '\n'
+    else:
+        attach = None
+
+    msg.set_content(log)
+    msg.add_alternative(htmlize(log), subtype='html')
+    if attach:
+        msg.add_attachment(attach, filename='log.txt', cte='quoted-printable')
+
+    #print(msg)
+    subprocess.run(emailproc, input=msg.as_bytes())
 
 
 def json_readf(fn):
@@ -151,7 +196,15 @@ def repatch_indir(patchset, newver, verpolicy):
     patches = int(patches.decode())
 
     vertag = "tags/v" + newver
-    if not sub(["git", "rebase", "HEAD~" + str(patches), "--onto", vertag]):
+
+    rebase_cmd = ["git", "rebase", "HEAD~" + str(patches), "--onto", vertag]
+    rebase_log = ".kbb-rebase-log"
+    rbproc = subprocess.Popen(rebase_cmd, stdin=DEVNULL, stderr=STDOUT, stdout=PIPE)
+    tee = subprocess.Popen(["tee", rebase_log], stdin=rbproc.stdout)
+    r1 = rbproc.wait()
+    tee.wait()
+    if r1:
+        mail("Uhh, rebase trouble with " + tagname, rebase_log)
         print(
             "Finish rebase manually. Use 'touch .skipkbb' to skip this kernel for now instead."
         )
@@ -176,7 +229,11 @@ def repatch(dir, patchset, newver, verpolicy):
     return r
 
 
+successlist = []
+
 def doakernel(k):
+    global successlist
+
     nv = None
     vp = k["verpolicy"]
     if vp == "mainline":
@@ -209,8 +266,10 @@ def doakernel(k):
     with open(logfn, "w") as f:
         if sub([k["build"], tag], stdin=DEVNULL, stderr=STDOUT, stdout=f):
             print("Done. Return value zero (y).")
+            successlist.append(f"{kname} {nv}")
         else:
             print("Oopsie? Build ended with nonzero return value :(")
+            mail(f"Build failure {kname} {nv}", logfn)
             with open("ATTN.txt", "a") as of:
                 of.write(logfn + "\n")
 
@@ -235,3 +294,9 @@ doakernel(kernel_c201_stable)
 
 # finally, move releases to prev
 os.replace(curr_fn, prev_releases)
+
+if successlist:
+    if len(successlist) > 1:
+        mail(f"Success building {len(successlist)} kernels", log="\n".join(successlist) + "\n")
+    else:
+        mail("Success building " + successlist[0], log="")
