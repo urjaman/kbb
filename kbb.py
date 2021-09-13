@@ -18,6 +18,11 @@ from subprocess import DEVNULL, PIPE, STDOUT
 from email.message import EmailMessage
 
 
+url = "https://www.kernel.org/releases.json"
+
+prev_releases = "prev_releases.json"
+curr_fn = "releases.json"
+
 whoami = 'KBB <kbb@urja.dev>'
 toaddr = 'urja@urja.dev, urjaman@gmail.com'
 emailproc = ['ssh', 'kbb@urja.dev', 'sendmail', '-t']
@@ -88,72 +93,6 @@ def subc(*args, **kwargs):
 
 def versplit(ver):
     return [int(x) if x.isdigit() else x for x in ver.split(sep=".")]
-
-
-url = "https://www.kernel.org/releases.json"
-
-prev_releases = "prev_releases.json"
-curr_fn = "releases.json"
-
-if not os.path.exists(curr_fn):
-    r = urllib.request.urlopen(url, timeout=30)
-    with open(curr_fn, "w+b") as t:
-        shutil.copyfileobj(r, t)
-
-if not os.path.exists(prev_releases):
-    os.rename(curr_fn, prev_releases)
-    sys.exit(0)
-
-rels = json_readf(curr_fn)
-prevs = json_readf(prev_releases)
-
-update_stable = []
-update_mainline = False
-for r in rels["releases"]:
-    if not r["version"][0].isdigit():
-        continue
-    verno = versplit(r["version"])
-    print(r["moniker"], verno)
-    found = False
-    for o in prevs["releases"]:
-        # mainline is just compared to mainline, rest to matching 2 numbers of version
-        if r["moniker"] == "mainline":
-            if o["moniker"] != "mainline":
-                continue
-            found = True
-            if r["version"] != o["version"]:
-                update_mainline = r["version"]
-            break
-        if o["moniker"] == "mainline":
-            continue
-        oldver = versplit(o["version"])
-        if oldver[0:2] == verno[0:2]:
-            found = True
-            if o["version"] != r["version"]:
-                update_stable.append(r["version"])
-            break
-    if not found:
-        if r["moniker"] == "mainline":
-            update_mainline = r["version"]
-        else:
-            update_stable.append(r["version"])
-
-print("Update stable:", bool(update_stable), update_stable)
-print("Update mainline:", bool(update_mainline), update_mainline)
-
-if update_stable or update_mainline:
-    os.chdir("linux")
-    if update_mainline:
-        print("Fetching mainline")
-        subc(["git", "fetch", "mainline", "master", "--tags"])
-        print("Done")
-
-    if update_stable:
-        print("Fetching stable(s)")
-        targets = ["tags/v" + x for x in update_stable]
-        subc(["git", "fetch", "--tags", "stable"] + targets)
-        print("Done")
-    os.chdir("..")
 
 
 def tag_exists(tag):
@@ -287,6 +226,69 @@ kernel_c201_stable = {
     "build": "./makepkg-c201-stable.sh",
     "verpolicy": "stable",
 }
+
+
+if not os.path.exists(curr_fn):
+    r = urllib.request.urlopen(url, timeout=30)
+    with open(curr_fn, "w+b") as t:
+        shutil.copyfileobj(r, t)
+
+if not os.path.exists(prev_releases):
+    os.rename(curr_fn, prev_releases)
+    sys.exit(0)
+
+rels = json_readf(curr_fn)
+prevs = json_readf(prev_releases)
+
+update_stable = []
+update_mainline = False
+for r in rels["releases"]:
+    if not r["version"][0].isdigit():
+        continue
+    verno = versplit(r["version"])
+    print(r["moniker"], verno)
+    found = False
+    for o in prevs["releases"]:
+        # mainline is just compared to mainline, rest to matching 2 numbers of version
+        if r["moniker"] == "mainline":
+            if o["moniker"] != "mainline":
+                continue
+            found = True
+            if r["version"] != o["version"]:
+                update_mainline = r["version"]
+            break
+        if o["moniker"] == "mainline":
+            continue
+        oldver = versplit(o["version"])
+        if oldver[0:2] == verno[0:2]:
+            found = True
+            if o["version"] != r["version"]:
+                update_stable.append(r["version"])
+            break
+    if not found:
+        if r["moniker"] == "mainline":
+            update_mainline = r["version"]
+        else:
+            update_stable.append(r["version"])
+
+print("Update stable:", bool(update_stable), update_stable)
+print("Update mainline:", bool(update_mainline), update_mainline)
+
+if update_stable or update_mainline:
+    os.chdir("linux")
+    if update_mainline:
+        print("Fetching mainline")
+        subc(["git", "fetch", "mainline", "master", "--tags"])
+        print("Done")
+
+    if update_stable:
+        print("Fetching stable(s)")
+        targets = ["tags/v" + x for x in update_stable]
+        subc(["git", "fetch", "--tags", "stable"] + targets)
+        print("Done")
+    os.chdir("..")
+
+
 
 
 doakernel(kernel_c201ml)
