@@ -66,11 +66,29 @@ def mail(subj, logfn = None, log = None):
     msg['From'] = whoami
     msg['To'] = toaddr
 
+    sniplocator = '*** Waiting for unfinished jobs'
+
     if log.count('\n') > attach_threshold:
         attach = log;
         log = log.splitlines()
-        log = log[-attach_threshold:]
-        log = '<snip>\n' + '\n'.join(log) + '\n'
+        sniploc = None
+        for i in range(len(log)-1,0,-1):
+            if sniplocator in log[i]:
+                sniploc = i
+                break
+        if sniploc:
+            presnip = "<snip>\n"
+            postsnip = "<snip>\n"
+            if sniploc < attach_threshold:
+                sniploc = attach_threshold
+                presnip = ""
+            log = log[sniploc-attach_threshold:sniploc]
+            if sniploc >= len(log):
+                postsnip = ""
+            log = presnip + '\n'.join(log) + '\n' + postsnip
+        else:
+            log = log[-attach_threshold:]
+            log = '<snip>\n' + '\n'.join(log) + '\n'
     else:
         attach = None
 
@@ -184,41 +202,35 @@ def repatch(dir, patchset, newver, verpolicy):
     return r
 
 
-
-def doakernel(k, rels, update_mainline, update_stable):
+def find_new_version(k, rels, update_mainline, update_stable):
     nv = None
     vp = k["verpolicy"]
     if vp == "mainline":
         if update_mainline:
             nv = update_mainline
-        else:
-            return None
     elif vp == "stable":
         if rels["latest_stable"]["version"] in update_stable:
             nv = rels["latest_stable"]["version"]
-        else:
-            return None
     else:
         for v in update_stable:
             if v.startswith(vp):
                 nv = v
-    if not nv:
-        return None
-    kname = k["patchset"] + "-" + vp
-    print(f"Re/patching {kname} to version {nv}")
-    tag = repatch(k["dir"], k["patchset"], nv, vp)
-    if not tag:
-        print("No tag returned - skipping build")
-        return None
+    return nv
+
+def kname(k):
+    return k["patchset"] + "-" + k["verpolicy"]
+
+
+def build(k, nv):
     today = datetime.date.today()
     ymd = today.strftime("%y%m%d")
     pids = str(os.getpid())
-    logfn = "log/build-" + kname + "-" + ymd + "-v" + nv + " " + pids + ".log"
+    logfn = "log/build-" + kname(k) + "-" + ymd + "-v" + nv + " " + pids + ".log"
     print(f"Building - for details see '{logfn}'")
     with open(logfn, "w") as f:
         if sub([k["build"], tag], stdin=DEVNULL, stderr=STDOUT, stdout=f):
             print("Done. Return value zero (y).")
-            return f"{kname} {nv}"
+            return f"{kname(k)} {nv}"
         else:
             print("Oopsie? Build ended with nonzero return value :(")
             mail(f"Build failure {kname} {nv}", logfn)
@@ -226,6 +238,19 @@ def doakernel(k, rels, update_mainline, update_stable):
                 of.write(logfn + "\n")
             return None
 
+
+def doakernel(k, rels, update_mainline, update_stable):
+    nv = find_new_version(k, rels, update_mainline, update_stable)
+    if not nv:
+        return None
+
+    print(f"Re/patching {kname(k)} to version {nv}")
+    tag = repatch(k["dir"], k["patchset"], nv, k["verpolicy"])
+    if not tag:
+        print("No tag returned - skipping build")
+        return None
+
+    return build(k, nv)
 
 
 def update_and_build():
