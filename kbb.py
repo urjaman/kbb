@@ -221,7 +221,7 @@ def kname(k):
     return k["patchset"] + "-" + k["verpolicy"]
 
 
-def build(k, nv):
+def build(k, nv, tag):
     today = datetime.date.today()
     ymd = today.strftime("%y%m%d")
     pids = str(os.getpid())
@@ -250,8 +250,42 @@ def doakernel(k, rels, update_mainline, update_stable):
         print("No tag returned - skipping build")
         return None
 
-    return build(k, nv)
+    return build(k, nv, tag)
 
+def rebuild_kernel(k):
+    # Figure out the version the kernel is "supposed to" be
+    os.chdir(k["dir"])
+    kv = subc(["git", "describe", "--tags", "--match", "v*", "--exclude", k["patchset"] + '-*' ], stdout=PIPE).decode().strip()
+    kv = kv.split(sep='-')
+    if kv[1].startswith("rc"):
+        kv = kv[0] + '-' + kv[1]
+    else:
+        kv = kv[0]
+    print(f"Determined the kernel version to be {kv}")
+
+    tagbase = k["patchset"] + '-' + kv
+    sub(["git", "tag", "-d", tagbase])
+    subc(["git", "tag", tagbase])
+    print(f"(Re-)created tag {tagbase} - now creating a fresh tag for build processes")
+
+    vnum = 2
+    while True:
+        buildtag = f"{tagbase}-v{vnum}"
+        if tag_exists(buildtag):
+            vnum += 1
+            continue
+        subc(["git", "tag", buildtag])
+        break
+    print(f"Tag for build: {buildtag}")
+
+    return build(k, kv, buildtag)
+
+def successmail(successlist):
+    if successlist:
+        if len(successlist) > 1:
+            mail(f"Success building {len(successlist)} kernels", log="\n".join(successlist) + "\n")
+        else:
+            mail("Success building " + successlist[0], log="\n")
 
 def update_and_build():
     if not os.path.exists(curr_fn):
@@ -314,8 +348,6 @@ def update_and_build():
             print("Done")
         os.chdir("..")
 
-
-
     successlist = []
     for k in kernels:
         r = doakernel(k, rels, update_mainline, update_stable)
@@ -324,13 +356,19 @@ def update_and_build():
 
     # finally, move releases to prev
     os.replace(curr_fn, prev_releases)
-
-    if successlist:
-        if len(successlist) > 1:
-            mail(f"Success building {len(successlist)} kernels", log="\n".join(successlist) + "\n")
-        else:
-            mail("Success building " + successlist[0], log="\n")
+    successmail(successlist)
 
 
-
-update_and_build()
+if len(sys.argv) == 1:
+    update_and_build()
+elif len(sys.argv) == 3 and sys.argv[1] == "--rebuild":
+    successlist = []
+    for k in kernels:
+        if kname(k) == sys.argv[2]:
+            print(f"Found definition for kernel {kname(k)} - trying to rebuild")
+            r = rebuild_kernel(k)
+            if r:
+                successlist.append(r)
+    successmail(successlist)
+else:
+    print(f"usage: {sys.argv[0]} [--rebuild <patchset-verpolicy>]")
