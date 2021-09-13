@@ -19,7 +19,7 @@ from email.message import EmailMessage
 
 
 whoami = 'KBB <kbb@urja.dev>'
-toaddr = 'urja@urja.dev'
+toaddr = 'urja@urja.dev, urjaman@gmail.com'
 emailproc = ['ssh', 'kbb@urja.dev', 'sendmail', '-t']
 
 def htmlize(s):
@@ -299,4 +299,4 @@ if successlist:
     if len(successlist) > 1:
         mail(f"Success building {len(successlist)} kernels", log="\n".join(successlist) + "\n")
     else:
-        mail("Success building " + successlist[0], log="")
+        mail("Success building " + successlist[0], log="\n")
