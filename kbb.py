@@ -352,7 +352,7 @@ def update_and_build():
     for k in kernels:
         r = doakernel(k, rels, update_mainline, update_stable)
         if r:
-            succeslist.append(r)
+            successlist.append(r)
 
     # finally, move releases to prev
     os.replace(curr_fn, prev_releases)
