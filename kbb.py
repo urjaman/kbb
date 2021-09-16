@@ -233,7 +233,7 @@ def build(k, nv, tag):
             return f"{kname(k)} {nv}"
         else:
             print("Oopsie? Build ended with nonzero return value :(")
-            mail(f"Build failure {kname} {nv}", logfn)
+            mail(f"Build failure {kname(k)} {nv}", logfn)
             with open("ATTN.txt", "a") as of:
                 of.write(logfn + "\n")
             return None
