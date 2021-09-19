@@ -256,11 +256,12 @@ def rebuild_kernel(k):
     # Figure out the version the kernel is "supposed to" be
     os.chdir(k["dir"])
     kv = subc(["git", "describe", "--tags", "--match", "v*", "--exclude", k["patchset"] + '-*' ], stdout=PIPE).decode().strip()
-    kv = kv.split(sep='-')
+    kv = kv[1:].split(sep='-')
     if kv[1].startswith("rc"):
         kv = kv[0] + '-' + kv[1]
     else:
         kv = kv[0]
+
     print(f"Determined the kernel version to be {kv}")
 
     tagbase = k["patchset"] + '-' + kv
@@ -277,7 +278,7 @@ def rebuild_kernel(k):
         subc(["git", "tag", buildtag])
         break
     print(f"Tag for build: {buildtag}")
-
+    os.chdir('..')
     return build(k, kv, buildtag)
 
 def successmail(successlist):
