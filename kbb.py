@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import time
 import datetime
+import traceback
 from subprocess import DEVNULL, PIPE, STDOUT
 from email.message import EmailMessage
 
@@ -132,6 +133,9 @@ def versplit(ver):
 def tag_exists(tag):
     return sub(["git", "rev-parse", "refs/tags/" + tag], stdout=DEVNULL, stderr=DEVNULL)
 
+def get_current_branch():
+    return subc(["git", "branch", "--show-current"], stdout=PIPE).decode().strip()
+
 
 # Calling rebase and tag "repatch" ... ok.
 def repatch_indir(patchset, newver, verpolicy):
@@ -151,11 +155,7 @@ def repatch_indir(patchset, newver, verpolicy):
         if newno[0:2] != oldno[0:2]:
             mlvertag = patchset + "-" + str(newno[0]) + "." + str(newno[1])
             if tag_exists(mlvertag):
-                branchname = (
-                    subc(["git", "branch", "--show-current"], stdout=PIPE)
-                    .decode()
-                    .strip()
-                )
+                branchname = get_current_branch()
                 subc(["git", "switch", "-C", branchname, "refs/tags/" + mlvertag])
                 (oldset, oldver) = mlvertag.split(sep="-", maxsplit=1)
 
@@ -221,15 +221,40 @@ def kname(k):
     return k["patchset"] + "-" + k["verpolicy"]
 
 
+def publish_indir(k, nv):
+    branch = get_current_branch()
+    tagname = k['patchset'] + "-" + nv
+    pids = str(os.getpid())
+    logfn = "../log/publish-" + kname(k) + "-" + "-v" + nv + "_" + pids + ".log"
+    printf(f"Publishing git tree, log: {logfn}")
+    b1 = f"{branch}:refs/heads/{branch}"
+    t1 = f"refs/tags/v{nv}:refs/tags/v{nv}"
+    t2 = f"refs/tags/{tagname}:refs/tags/{tagname}"
+    with open(logfn, "w") as f:
+        if not sub(['git','push','-f',"publish", b1, t1, t2], stdin=DEVNULL, stderr=STDOUT, stdout=f):
+            mail(f"Publish failure (build success) {kname(k)} {nv}", logfn)
+
+def publish(k, nv):
+    os.chdir(k['dir'])
+    try:
+        publish_indir(k, nv)
+    except Exception:
+        traceback.print_exc()
+    os.chdir("..")
+
+
 def build(k, nv, tag):
     today = datetime.date.today()
     ymd = today.strftime("%y%m%d")
     pids = str(os.getpid())
-    logfn = "log/build-" + kname(k) + "-" + ymd + "-v" + nv + " " + pids + ".log"
+    logfn = "log/build-" + kname(k) + "-" + ymd + "-v" + nv + "_" + pids + ".log"
     print(f"Building - for details see '{logfn}'")
     with open(logfn, "w") as f:
         if sub([k["build"], tag], stdin=DEVNULL, stderr=STDOUT, stdout=f):
             print("Done. Return value zero (y).")
+            print("Running publish()..")
+            publish(k, nv)
+            print("Done")
             return f"{kname(k)} {nv}"
         else:
             print("Oopsie? Build ended with nonzero return value :(")
@@ -280,6 +305,7 @@ def rebuild_kernel(k):
     print(f"Tag for build: {buildtag}")
     os.chdir('..')
     return build(k, kv, buildtag)
+
 
 def successmail(successlist):
     if successlist:
