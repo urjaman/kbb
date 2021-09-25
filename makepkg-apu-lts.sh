@@ -5,4 +5,4 @@ cd apu-lts
 if [ -n "$1" ]; then
 	echo $1 > git-tag
 fi
-makepkg
+makepkg --config ../x86_64-makepkg.conf
