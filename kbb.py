@@ -37,12 +37,17 @@ kernels = [kernel_c201ml, kernel_c201_stable]
 
 url = "https://www.kernel.org/releases.json"
 
+prev2_releases = "old_releases.json"
 prev_releases = "prev_releases.json"
 curr_fn = "releases.json"
 
-whoami = 'KBB <kbb@urja.dev>'
-toaddr = 'urja@urja.dev, urjaman@gmail.com'
-emailproc = ['ssh', 'kbb@urja.dev', 'sendmail', '-t']
+emhost = '\x40urja.dev'
+whoami = f'KBB <kbb{emhost}>'
+toaddr = f'urja{emhost}, urjaman\x40gmail.com'
+emailproc = ['ssh', 'kbb\x40urja.dev', 'sendmail', '-t']
+
+def vtag4xfer(x):
+    return f"refs/tags/v{x}:refs/tags/v{x}"
 
 def htmlize(s):
     escapes = {
@@ -365,13 +370,13 @@ def update_and_build():
         os.chdir("linux")
         if update_mainline:
             print("Fetching mainline")
-            subc(["git", "fetch", "mainline", "master", "--tags"])
+            subc(["git", "fetch", "mainline", "master", vtag4xfer(update_mainline)])
             print("Done")
 
         if update_stable:
             print("Fetching stable(s)")
-            targets = ["tags/v" + x for x in update_stable]
-            subc(["git", "fetch", "--tags", "stable"] + targets)
+            targets = [vtag4xfer(x) for x in update_stable]
+            subc(["git", "fetch", "stable"] + targets)
             print("Done")
         os.chdir("..")
 
@@ -381,7 +386,8 @@ def update_and_build():
         if r:
             successlist.append(r)
 
-    # finally, move releases to prev
+    # finally, move prev to old, releases to prev
+    os.replace(prev_releases, prev2_releases)
     os.replace(curr_fn, prev_releases)
     successmail(successlist)
 
