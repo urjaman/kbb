@@ -1,0 +1,95 @@
+# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+# Hacker: Urja ;P
+
+pkgbase=linux-apu
+pkgver=5.10.68
+pkgrel=1
+pkgdesc='LTS Linux (with APU spice)'
+url="https://www.kernel.org/"
+arch=(x86_64)
+license=(GPL2)
+makedepends=(
+  bc kmod libelf cpio perl tar xz xmlto git
+)
+options=('!strip')
+_srcname=linux
+GITTAG=$(cat /home/urjaman/bulk/kernel-ops/apu-lts/git-tag)
+source=(
+ "linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
+  config         # the main kernel config file
+  90-linux.hook # hook to update the in-flash kernel (on coreboot if needed...)
+)
+
+sha256sums=('SKIP'
+            'SKIP'
+	    'SKIP'
+           )
+
+
+pkgver() {
+  cd "${_srcname}"
+  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd $_srcname
+
+  echo "Setting version..."
+  scripts/setlocalversion --save-scmversion
+  echo "-$pkgrel" > localversion.10-pkgrel
+  echo "${pkgbase#linux}" > localversion.20-pkgname
+
+  echo "Setting config..."
+  cat "${srcdir}/config" > ./.config
+  make olddefconfig
+  cp ./.config ../../config
+
+  make -s kernelrelease > version
+  echo "Prepared $pkgbase version $(<version)"
+}
+
+build() {
+  cd $_srcname
+  make -j2 all
+}
+
+_package() {
+  pkgdesc="The $pkgdesc kernel and modules"
+  depends=(coreutils kmod initramfs)
+  optdepends=('crda: to set the correct wireless channels of your country'
+              'linux-firmware: firmware images needed for some devices')
+  provides=(VIRTUALBOX-GUEST-MODULES WIREGUARD-MODULE)
+  replaces=(wireguard-lts)
+
+  cd $_srcname
+  local kernver="$(<version)"
+  local modulesdir="$pkgdir/usr/lib/modules/$kernver"
+
+  echo "Installing boot image..."
+  # systemd expects to find the kernel here to allow hibernation
+  # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
+  install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
+
+  # Used by mkinitcpio to name the kernel
+  echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
+
+  echo "Installing modules..."
+  make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 modules_install
+
+  # remove build and source links
+  rm "$modulesdir"/{source,build}
+
+  # Add the hoook...
+  sed "${_subst}" ../90-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/90-${pkgbase}.hook"
+}
+
+pkgname=("$pkgbase")
+for _p in "${pkgname[@]}"; do
+  eval "package_$_p() {
+    $(declare -f "_package${_p#$pkgbase}")
+    _package${_p#$pkgbase}
+  }"
+done
+
+# vim:set ts=8 sts=2 sw=2 et:

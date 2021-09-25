@@ -1,0 +1,165 @@
+# ARMv7 ex-multi-platform modified for C201-only
+# Original by:
+# Maintainer: Kevin Mihelich <kevin@archlinuxarm.org>
+# Modified by:
+# Maintainer: Urja Rannikko <urjaman@gmail.com>
+
+buildarch=4
+
+# This is the "extension" to the base linux-c201 name -- used in zImage 
+# dtb paths too
+_xname=-test
+
+pkgbase=linux-c201${_xname}
+_srcname=linux
+_kernelname=${pkgbase#linux}
+_desc="Veyron Speedy"
+pkgver=5.15.rc2.r14.gcf86a3ec262f
+pkgrel=1
+arch=('armv7h')
+url="http://www.kernel.org/"
+license=('GPL2')
+makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
+options=('!strip')
+GITTAG=$(cat /home/urjaman/bulk/kernel-ops/c201-test/git-tag)
+source=(
+	#"linux::git+https://github.com/urjaman/linux.git#branch=c201-5.12.14_v1"
+	"linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
+        'kernel.its'
+        'kernel.keyblock'
+        'kernel_data_key.vbprivk'
+        '60-linux.hook'
+        'config')
+
+pkgver() {
+  cd "${_srcname}"
+  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${srcdir}/${_srcname}"
+  
+  cat "${srcdir}/config" > ./.config
+
+  # Append (if -rc*) or set ${_xname}-${pkgrel} as extraversion
+  sed -ri "s/^(EXTRAVERSION =) ?(-rc[^-]*|).*/\1 \2${_xname}-${pkgrel}/" Makefile
+
+  # don't run depmod on 'make install'. We'll do this ourselves in packaging
+  sed -i '2iexit 0' scripts/depmod.sh
+
+}
+
+build() {
+  cd "${srcdir}/${_srcname}"
+
+  # get kernel version
+  make prepare
+
+  # load configuration
+  # Configure the kernel. Replace the line below with one of your choice.
+  #make menuconfig # CLI menu for configuration
+  #make nconfig # new CLI menu for configuration
+  #make xconfig # X-based configuration
+  make olddefconfig # using old config from previous kernel version (quiet)
+  # ... or manually edit .config
+
+  # Copy back our configuration (use with new kernel version)
+  cp ./.config ../../config
+
+  ####################
+  # stop here
+  # this is useful to configure the kernel
+  #msg "Stopping build"
+  #return 1
+  ####################
+
+  #yes "" | make config
+
+  # build!
+  make -j2 ${MAKEFLAGS} zImage modules dtbs
+}
+
+_package() {
+  pkgdesc="The Linux Kernel and modules - ${_desc}"
+  depends=('coreutils' 'linux-firmware' 'kmod' 'mkinitcpio>=0.7')
+  optdepends=('crda: to set the correct wireless channels of your country')
+  provides=('kernel26' "linux=${pkgver}")
+
+  cd "${srcdir}/${_srcname}"
+
+  KARCH=arm
+
+  # get kernel version
+  _kernver="$(make kernelrelease)"
+  _basekernel=${_kernver%%-*}
+  _basekernel=${_basekernel%.*}
+
+  mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
+  make INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
+  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs${_xname}" dtbs_install
+  cp arch/$KARCH/boot/zImage "${pkgdir}/boot/zImage${_xname}"
+
+  # make room for external modules
+  local _extramodules="extramodules-${_basekernel}${_kernelname}"
+  ln -s "../${_extramodules}" "${pkgdir}/usr/lib/modules/${_kernver}/extramodules"
+
+  # add real version for building modules and running depmod from hook
+  echo "${_kernver}" |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
+
+  # remove build and source links
+  rm "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
+
+  # now we call depmod...
+  depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
+
+  # sed expression for following substitutions
+  local _subst="
+    s|%PKGBASE%|${pkgbase}|g
+    s|%KERNVER%|${_kernver}|g
+    s|%EXTRAMODULES%|${_extramodules}|g
+  "
+
+  # install pacman hooks
+  sed "${_subst}" ../60-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/60-${pkgbase}.hook"
+}
+
+_package-chromebook() {
+  pkgdesc="The Linux Kernel - ${_desc} - Chromebooks"
+  depends=("linux-c201${_xname}")
+  install=chromebook.install
+
+  cd "${srcdir}/${_srcname}"
+
+  cp ../kernel.its .
+  mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
+  dd if=/dev/zero of=bootloader.bin bs=512 count=1
+  echo 'console=tty0 init=/sbin/init root=PARTUUID=%U/PARTNROFF=1 rootwait rw noinitrd' > cmdline
+  vbutil_kernel \
+    --pack vmlinux.kpart \
+    --version 1 \
+    --vmlinuz vmlinux.uimg \
+    --arch arm \
+    --keyblock ../kernel.keyblock \
+    --signprivate ../kernel_data_key.vbprivk \
+    --config cmdline \
+    --bootloader bootloader.bin
+
+  mkdir -p "${pkgdir}/boot"
+  cp vmlinux.kpart "${pkgdir}/boot"
+}
+
+pkgname=("${pkgbase}")
+for _p in ${pkgname[@]}; do
+  eval "package_${_p}() {
+    _package${_p#${pkgbase}}
+  }"
+done
+
+md5sums=('SKIP'
+         '9751afcc5d59bf5d34561efbe7fc1fec'
+         '61c5ff73c136ed07a7aadbf58db3d96a'
+         '584777ae88bce2c5659960151b64c7d8'
+         'ce6c81ad1ad1f8b333fd6077d47abdaf'
+         'SKIP')

@@ -1,0 +1,10 @@
+[Trigger]
+Type = File
+Operation = Install
+Operation = Upgrade
+Target = boot/vmlinuz-%PKGBASE%
+
+[Action]
+Description = Updating %PKGBASE% kernel in flash...
+When = PostTransaction
+Exec = [ -x /boot/cbkernel/update.sh ] && /boot/cbkernel/update.sh
