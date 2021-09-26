@@ -9,3 +9,5 @@ if [ -n "$1" ]; then
 	echo $1 > git-tag
 fi
 makepkg --config ../armv7h-makepkg.conf
+cd ..
+./repothis.sh armv7h c201-test/*.pkg.tar.*
