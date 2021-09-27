@@ -231,7 +231,7 @@ def publish_indir(k, nv):
     tagname = k['patchset'] + "-" + nv
     pids = str(os.getpid())
     logfn = "../log/publish-" + kname(k) + "-" + "-v" + nv + "_" + pids + ".log"
-    printf(f"Publishing git tree, log: {logfn}")
+    print(f"Publishing git tree, log: {logfn}")
     b1 = f"{branch}:refs/heads/{branch}"
     t1 = f"refs/tags/v{nv}:refs/tags/v{nv}"
     t2 = f"refs/tags/{tagname}:refs/tags/{tagname}"
