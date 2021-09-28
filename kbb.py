@@ -226,11 +226,14 @@ def kname(k):
     return k["patchset"] + "-" + k["verpolicy"]
 
 
-def publish_indir(k, nv):
+def publish_indir(k, nv, tag):
     branch = get_current_branch()
-    tagname = k['patchset'] + "-" + nv
+    if tag:
+        tagname = tag
+    else:
+        tagname = k['patchset'] + "-" + nv
     pids = str(os.getpid())
-    logfn = "../log/publish-" + kname(k) + "-" + "-v" + nv + "_" + pids + ".log"
+    logfn = "../log/publish-" + kname(k) + "-v" + nv + "_" + pids + ".log"
     print(f"Publishing git tree, log: {logfn}")
     b1 = f"{branch}:refs/heads/{branch}"
     t1 = f"refs/tags/v{nv}:refs/tags/v{nv}"
@@ -239,10 +242,10 @@ def publish_indir(k, nv):
         if not sub(['git','push','-f',"publish", b1, t1, t2], stdin=DEVNULL, stderr=STDOUT, stdout=f):
             mail(f"Publish failure (build success) {kname(k)} {nv}", logfn)
 
-def publish(k, nv):
+def publish(k, nv, tag=None):
     os.chdir(k['dir'])
     try:
-        publish_indir(k, nv)
+        publish_indir(k, nv, tag)
     except Exception:
         traceback.print_exc()
     os.chdir("..")
@@ -258,7 +261,7 @@ def build(k, nv, tag):
         if sub([k["build"], tag], stdin=DEVNULL, stderr=STDOUT, stdout=f):
             print("Done. Return value zero (y).")
             print("Running publish()..")
-            publish(k, nv)
+            publish(k, nv, tag)
             print("Done")
             return f"{kname(k)} {nv}"
         else:
