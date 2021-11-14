@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 5.10.68 Kernel Configuration
+# Linux/x86 5.10.79 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc (GCC) 11.1.0"
 CONFIG_CC_IS_GCC=y
@@ -3795,7 +3795,6 @@ CONFIG_DMA_ACPI=y
 # DMABUF options
 #
 # CONFIG_SYNC_FILE is not set
-# CONFIG_DMABUF_MOVE_NOTIFY is not set
 # CONFIG_DMABUF_HEAPS is not set
 # end of DMABUF options
 

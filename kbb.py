@@ -33,7 +33,14 @@ kernel_c201_stable = {
     "verpolicy": "stable",
 }
 
-kernels = [kernel_c201ml, kernel_c201_stable]
+kernel_apu_lts = {
+    "dir": "linux-kbb-apu",
+    "patchset": "apu",
+    "build": "./makepkg-apu-lts.sh",
+    "verpolicy": "5.10",
+}
+
+kernels = [kernel_c201ml, kernel_c201_stable, kernel_apu_lts]
 
 url = "https://www.kernel.org/releases.json"
 
