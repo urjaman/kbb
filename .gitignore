@@ -4,3 +4,4 @@ x-tools*
 *.log
 kbb.lock
 log/
+pkgarchive/
