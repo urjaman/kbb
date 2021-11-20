@@ -40,7 +40,14 @@ kernel_apu_lts = {
     "verpolicy": "5.10",
 }
 
-kernels = [kernel_c201ml, kernel_c201_stable, kernel_apu_lts]
+kernel_i586con = {
+    "dir": "linux-kbb-i586con",
+    "patchset": "i586con",
+    "build": "./i586con-update-kernel.py",
+    "verpolicy": "5.15",
+}
+
+kernels = [kernel_c201ml, kernel_c201_stable, kernel_apu_lts, kernel_i586con]
 
 url = "https://www.kernel.org/releases.json"
 
@@ -172,7 +179,7 @@ def repatch_indir(patchset, newver, verpolicy):
                 (oldset, oldver) = mlvertag.split(sep="-", maxsplit=1)
 
     if oldset != patchset:
-        print("Error: this git tree is on a tag for patchset {oldset}, not {patchset}?")
+        print(f"Error: this git tree is on a tag for patchset {oldset}, not {patchset}?")
         return False
 
     oldvertag = "tags/v" + oldver
