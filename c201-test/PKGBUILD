@@ -14,7 +14,7 @@ pkgbase=linux-c201${_xname}
 _srcname=linux
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.16.rc1.r17.g6d2f3c297195
+pkgver=5.16rc6.r15.g03f17f03df1f
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
@@ -33,7 +33,7 @@ source=(
 
 pkgver() {
   cd "${_srcname}"
-  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-rc/rc/;s/-/./g'
 }
 
 prepare() {
@@ -133,7 +133,7 @@ _package-chromebook() {
   cd "${srcdir}/${_srcname}"
 
   cp ../kernel.its .
-  mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg
+  mkimage -D "-I dts -O dtb -p 2048" -f kernel.its vmlinux.uimg || true
   dd if=/dev/zero of=bootloader.bin bs=512 count=1
   echo 'console=tty0 init=/sbin/init root=PARTUUID=%U/PARTNROFF=1 rootwait rw noinitrd' > cmdline
   vbutil_kernel \
@@ -150,7 +150,7 @@ _package-chromebook() {
   cp vmlinux.kpart "${pkgdir}/boot"
 }
 
-pkgname=("${pkgbase}")
+pkgname=("${pkgbase}" "${pkgbase}-chromebook")
 for _p in ${pkgname[@]}; do
   eval "package_${_p}() {
     _package${_p#${pkgbase}}
