@@ -33,6 +33,13 @@ kernel_c201_stable = {
     "verpolicy": "stable",
 }
 
+kernel_c201_lts = {
+    "dir": "linux-kbb-c201-lts",
+    "patchset": "c201",
+    "build": "./makepkg-c201-lts.sh",
+    "verpolicy": "5.15",
+}
+
 kernel_apu_lts = {
     "dir": "linux-kbb-apu",
     "patchset": "apu",
@@ -47,7 +54,7 @@ kernel_i586con = {
     "verpolicy": "5.15",
 }
 
-kernels = [kernel_c201ml, kernel_c201_stable, kernel_apu_lts, kernel_i586con]
+kernels = [kernel_c201ml, kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
 
 url = "https://www.kernel.org/releases.json"
 
