@@ -8,20 +8,20 @@ buildarch=4
 
 # This is the "extension" to the base linux-c201 name -- used in zImage 
 # dtb paths too
-_xname=
+_xname=-lts
 
 pkgbase=linux-c201${_xname}
 _srcname=linux
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.15.11.r15.ga8cc13fa42c4
+pkgver=5.15.15.r15.gcc1670c6f097
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-GITTAG=$(cat /home/urjaman/bulk/kernel-ops/c201-stable/git-tag)
+GITTAG=$(cat /home/urjaman/bulk/kernel-ops/c201-lts/git-tag)
 source=(
 	#"linux::git+https://github.com/urjaman/linux.git#branch=c201-5.12.14_v1"
 	"linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
