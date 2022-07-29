@@ -14,17 +14,18 @@ pkgbase=linux-c201${_xname}
 _srcname=linux
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.17.r15.ga22e7a78344d
+pkgver=5.19rc8.r14.gbc3182aa2d22
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-GITTAG=$(cat /home/urjaman/bulk/kernel-ops/c201-test/git-tag)
+_worktree=/home/urjaman/bulk/kernel-ops/linux-kbb-c201
+
 source=(
 	#"linux::git+https://github.com/urjaman/linux.git#branch=c201-5.12.14_v1"
-	"linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
+	#"linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
         'kernel.its'
         'kernel.keyblock'
         'kernel_data_key.vbprivk'
@@ -32,11 +33,12 @@ source=(
         'config')
 
 pkgver() {
-  cd "${_srcname}"
-  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-rc/rc/;s/-/./g'
+  (cd "${_worktree}"; git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-rc/rc/;s/-/./g')  
 }
 
 prepare() {
+  rsync -a --exclude=/.git "${_worktree}/" "${srcdir}/${_srcname}"
+
   cd "${srcdir}/${_srcname}"
   
   cat "${srcdir}/config" > ./.config
@@ -46,7 +48,6 @@ prepare() {
 
   # don't run depmod on 'make install'. We'll do this ourselves in packaging
   sed -i '2iexit 0' scripts/depmod.sh
-
 }
 
 build() {
@@ -157,7 +158,7 @@ for _p in ${pkgname[@]}; do
   }"
 done
 
-md5sums=('SKIP'
+md5sums=(
          '9751afcc5d59bf5d34561efbe7fc1fec'
          '61c5ff73c136ed07a7aadbf58db3d96a'
          '584777ae88bce2c5659960151b64c7d8'

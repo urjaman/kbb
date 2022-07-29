@@ -14,7 +14,7 @@ pkgbase=linux-c201${_xname}
 _srcname=linux
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.15.32.r15.ge312be0ee2fb
+pkgver=5.15.57.r15.gaf179003d1f7
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
@@ -62,6 +62,8 @@ build() {
   #make xconfig # X-based configuration
   make olddefconfig # using old config from previous kernel version (quiet)
   # ... or manually edit .config
+
+  #make menuconfig
 
   # Copy back our configuration (use with new kernel version)
   cp ./.config ../../config
