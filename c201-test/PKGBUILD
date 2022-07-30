@@ -21,7 +21,7 @@ url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-_worktree=/home/urjaman/bulk/kernel-ops/linux-kbb-c201
+_worktree=$(realpath ${startdir}/..)/linux-kbb-c201
 
 source=(
 	#"linux::git+https://github.com/urjaman/linux.git#branch=c201-5.12.14_v1"

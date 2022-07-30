@@ -11,33 +11,39 @@ buildarch=4
 _xname=
 
 pkgbase=linux-c201${_xname}
-_srcname=linux
+_srcname=linux-5.18
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.16.14.r15.gccee71d47596
+pkgver=5.18.15
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-GITTAG=$(cat /home/urjaman/bulk/kernel-ops/c201-stable/git-tag)
 source=(
-	#"linux::git+https://github.com/urjaman/linux.git#branch=c201-5.12.14_v1"
-	"linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
+	"https://www.kernel.org/pub/linux/kernel/v5.x/${_srcname}.tar.xz"
+        "https://www.kernel.org/pub/linux/kernel/v5.x/patch-${pkgver}.xz"
+	'c201.patch'
         'kernel.its'
         'kernel.keyblock'
         'kernel_data_key.vbprivk'
         '60-linux.hook'
         'config')
 
-pkgver() {
-  cd "${_srcname}"
-  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-/./g'
-}
-
 prepare() {
   cd "${srcdir}/${_srcname}"
+
+  # hack to allow git apply to work on non-git files while in a git directory
+  export GIT_DIR=/var/empty
+
+  # add upstream patch
+  git apply --whitespace=nowarn ../patch-${pkgver}
+
+  # C201 patchset
+  git apply ../c201.patch
+
+  unset GIT_DIR
   
   cat "${srcdir}/config" > ./.config
 
@@ -157,9 +163,11 @@ for _p in ${pkgname[@]}; do
   }"
 done
 
-md5sums=('SKIP'
-         '9751afcc5d59bf5d34561efbe7fc1fec'
-         '61c5ff73c136ed07a7aadbf58db3d96a'
-         '584777ae88bce2c5659960151b64c7d8'
-         'ce6c81ad1ad1f8b333fd6077d47abdaf'
-         'SKIP')
+sha256sums=('51f3f1684a896e797182a0907299cc1f0ff5e5b51dd9a55478ae63a409855cee'
+            'c5fa763f04fb1efc773f4790d24378a4c445fd1dbf8cf58ad4268583f7ef6160'
+            '3cedb08cae0abe3bb9b2e8e5330354431068b019857197495430d1ee67281f73'
+            '017e419a9c82fd0921b1bd48610feb0edd15f9545256a5d3ea7d32f9bb80094f'
+            '4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb'
+            'bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b'
+            'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
+            'cd8fb960477a3ab7403c1e5845e6b8179177da1ed7a67a419998d3800561bec6')

@@ -1,0 +1,1487 @@
+From c15c0dc9d500f142f7f0a1a1251a2c12d7571a4f Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Sun, 26 Aug 2018 21:14:30 +0000
+Subject: [PATCH 01/15] dt-bindings: clock: rk3288-cru: Add property to
+ dedicate NPLL for VOPx
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ .../devicetree/bindings/clock/rockchip,rk3288-cru.txt          | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt b/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
+index bf3a9ec19241..59be6c44f453 100644
+--- a/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
++++ b/Documentation/devicetree/bindings/clock/rockchip,rk3288-cru.txt
+@@ -22,6 +22,9 @@ Optional Properties:
+ 
+ - rockchip,grf: phandle to the syscon managing the "general register files"
+   If missing pll rates are not changeable, due to the missing pll lock status.
++- rockchip,npll-for-vop: u32 0 or 1, dedicates NPLL to a VOP output unit for
++  more frequency flexibility for the selected VOP output at a cost of
++  flexibility for other devices. Disabled if not present or -1.
+ 
+ Each clock is assigned an identifier and client nodes can use this identifier
+ to specify the clock which they consume. All available clocks are defined as
+-- 
+2.37.1
+
+
+From 42893118e404a8491ab7848130d7fb384ca0385c Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Mon, 27 Aug 2018 10:30:55 +0000
+Subject: [PATCH 02/15] drivers: clk-rk3288: support for dedicating NPLL to a
+ VOP
+
+As controlled by the just introduced dts property.
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ drivers/clk/rockchip/clk-rk3288.c | 69 +++++++++++++++++++++++++------
+ drivers/clk/rockchip/clk.h        |  3 ++
+ 2 files changed, 60 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/clk/rockchip/clk-rk3288.c b/drivers/clk/rockchip/clk-rk3288.c
+index baa5aebd3277..11493f0be2b1 100644
+--- a/drivers/clk/rockchip/clk-rk3288.c
++++ b/drivers/clk/rockchip/clk-rk3288.c
+@@ -195,10 +195,14 @@ PNAME(mux_ddrphy_p)		= { "dpll_ddr", "gpll_ddr" };
+ PNAME(mux_aclk_cpu_src_p)	= { "cpll_aclk_cpu", "gpll_aclk_cpu" };
+ 
+ PNAME(mux_pll_src_cpll_gpll_p)		= { "cpll", "gpll" };
+-PNAME(mux_pll_src_npll_cpll_gpll_p)	= { "npll", "cpll", "gpll" };
+-PNAME(mux_pll_src_cpll_gpll_npll_p)	= { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_npll_cpll_gpll_p)	= { "npll", "cpll", "gpll" };
++
++PNAME_ED(mux_pll_src_cgn_pll_nonvop_p)	= { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_cgn_pll_vop0_p) = { "cpll", "gpll", "npll" };
++PNAME_ED(mux_pll_src_cgn_pll_vop1_p) = { "cpll", "gpll", "npll" };
++
+ PNAME(mux_pll_src_cpll_gpll_usb480m_p)	= { "cpll", "gpll", "unstable:usbphy480m_src" };
+-PNAME(mux_pll_src_cpll_gll_usb_npll_p)	= { "cpll", "gpll", "unstable:usbphy480m_src", "npll" };
++PNAME_ED(mux_pll_src_cpll_gll_usb_npll_p) = { "cpll", "gpll", "unstable:usbphy480m_src", "npll" };
+ 
+ PNAME(mux_mmc_src_p)	= { "cpll", "gpll", "xin24m", "xin24m" };
+ PNAME(mux_i2s_pre_p)	= { "i2s_src", "i2s_frac", "ext_i2s", "xin12m" };
+@@ -442,24 +446,24 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 			RK3288_CLKSEL_CON(30), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 4, GFLAGS),
+ 
+-	COMPOSITE(DCLK_VOP0, "dclk_vop0", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(DCLK_VOP0, "dclk_vop0", mux_pll_src_cgn_pll_vop0_p, 0,
+ 			RK3288_CLKSEL_CON(27), 0, 2, MFLAGS, 8, 8, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 1, GFLAGS),
+-	COMPOSITE(DCLK_VOP1, "dclk_vop1", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(DCLK_VOP1, "dclk_vop1", mux_pll_src_cgn_pll_vop1_p, 0,
+ 			RK3288_CLKSEL_CON(29), 6, 2, MFLAGS, 8, 8, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 3, GFLAGS),
+ 
+ 	COMPOSITE_NODIV(SCLK_EDP_24M, "sclk_edp_24m", mux_edp_24m_p, 0,
+ 			RK3288_CLKSEL_CON(28), 15, 1, MFLAGS,
+ 			RK3288_CLKGATE_CON(3), 12, GFLAGS),
+-	COMPOSITE(SCLK_EDP, "sclk_edp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_EDP, "sclk_edp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(28), 6, 2, MFLAGS, 0, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 13, GFLAGS),
+ 
+-	COMPOSITE(SCLK_ISP, "sclk_isp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_ISP, "sclk_isp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(6), 6, 2, MFLAGS, 0, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 14, GFLAGS),
+-	COMPOSITE(SCLK_ISP_JPE, "sclk_isp_jpe", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_ISP_JPE, "sclk_isp_jpe", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(6), 14, 2, MFLAGS, 8, 6, DFLAGS,
+ 			RK3288_CLKGATE_CON(3), 15, GFLAGS),
+ 
+@@ -468,16 +472,16 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 	GATE(SCLK_HDMI_CEC, "sclk_hdmi_cec", "xin32k", 0,
+ 			RK3288_CLKGATE_CON(5), 11, GFLAGS),
+ 
+-	COMPOSITE(ACLK_HEVC, "aclk_hevc", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(ACLK_HEVC, "aclk_hevc", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(39), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 13, GFLAGS),
+ 	DIV(HCLK_HEVC, "hclk_hevc", "aclk_hevc", 0,
+ 			RK3288_CLKSEL_CON(40), 12, 2, DFLAGS),
+ 
+-	COMPOSITE(SCLK_HEVC_CABAC, "sclk_hevc_cabac", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_HEVC_CABAC, "sclk_hevc_cabac", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(42), 6, 2, MFLAGS, 0, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 14, GFLAGS),
+-	COMPOSITE(SCLK_HEVC_CORE, "sclk_hevc_core", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(SCLK_HEVC_CORE, "sclk_hevc_core", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(42), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(13), 15, GFLAGS),
+ 
+@@ -551,7 +555,7 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+ 	COMPOSITE(0, "sclk_tspout", mux_tspout_p, 0,
+ 			RK3288_CLKSEL_CON(35), 14, 2, MFLAGS, 8, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(4), 11, GFLAGS),
+-	COMPOSITE(0, "sclk_tsp", mux_pll_src_cpll_gpll_npll_p, 0,
++	COMPOSITE(0, "sclk_tsp", mux_pll_src_cgn_pll_nonvop_p, 0,
+ 			RK3288_CLKSEL_CON(35), 6, 2, MFLAGS, 0, 5, DFLAGS,
+ 			RK3288_CLKGATE_CON(4), 10, GFLAGS),
+ 
+@@ -932,6 +936,7 @@ static void __init rk3288_common_init(struct device_node *np,
+ 				      enum rk3288_variant soc)
+ {
+ 	struct rockchip_clk_provider *ctx;
++	s32 npll_vop = -1;
+ 
+ 	rk3288_cru_base = of_iomap(np, 0);
+ 	if (!rk3288_cru_base) {
+@@ -939,6 +944,46 @@ static void __init rk3288_common_init(struct device_node *np,
+ 		return;
+ 	}
+ 
++	if (!of_property_read_s32(np, "rockchip,npll-for-vop", &npll_vop)) {
++		if ((npll_vop < -1) || (npll_vop > 1)) {
++			pr_warn("%s: invalid VOP to dedicate NPLL to: %d\n",
++				__func__, npll_vop);
++		} else if (npll_vop >= 0) {
++			unsigned int vop_clk_id;
++			const char ** npll_names;
++			const char ** non_npll_names;
++			int i;
++
++			/* Firstly, not-VOP needs to not use npll */
++			mux_pll_src_npll_cpll_gpll_p[0] = "dummy_npll";
++			mux_pll_src_cgn_pll_nonvop_p[2] = "dummy_npll";
++			mux_pll_src_cpll_gll_usb_npll_p[3] = "dummy_npll";
++
++			/* Then the npll VOP needs to only use npll, and the other one not use npll. */
++			if (npll_vop) {
++				vop_clk_id = DCLK_VOP1;
++				npll_names = mux_pll_src_cgn_pll_vop1_p;
++				non_npll_names = mux_pll_src_cgn_pll_vop0_p;
++			} else {
++				vop_clk_id = DCLK_VOP0;
++				npll_names = mux_pll_src_cgn_pll_vop0_p;
++				non_npll_names = mux_pll_src_cgn_pll_vop1_p;
++			}
++			npll_names[0] = "dummy_cpll";
++			npll_names[1] = "dummy_gpll";
++			non_npll_names[2] = "dummy_npll";
++
++			/* Lastly the npll-dedicated-VOP needs to be able to control npll. */
++			for (i = 0; i < ARRAY_SIZE(rk3288_clk_branches); i++) {
++				if (rk3288_clk_branches[i].id == vop_clk_id) {
++					rk3288_clk_branches[i].flags |= CLK_SET_RATE_PARENT;
++					break;
++				}
++			}
++			pr_debug("%s: npll dedicated for VOP %d\n", __func__, npll_vop);
++		}
++	}
++
+ 	ctx = rockchip_clk_init(np, rk3288_cru_base, CLK_NR_CLKS);
+ 	if (IS_ERR(ctx)) {
+ 		pr_err("%s: rockchip clk init failed\n", __func__);
+diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
+index 7aa45cc70287..18c7071ad017 100644
+--- a/drivers/clk/rockchip/clk.h
++++ b/drivers/clk/rockchip/clk.h
+@@ -423,6 +423,9 @@ struct clk *rockchip_clk_register_muxgrf(const char *name,
+ 
+ #define PNAME(x) static const char *const x[] __initconst
+ 
++/* For when you want to be able to modify the pointers. */
++#define PNAME_ED(x) static const char * x[] __initdata
++
+ enum rockchip_clk_branch_type {
+ 	branch_composite,
+ 	branch_mux,
+-- 
+2.37.1
+
+
+From 1290508f82245ad8d2ee3e31d4bb1b5d93ff2f9f Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Wed, 22 Aug 2018 18:36:40 +0000
+Subject: [PATCH 03/15] drm: dw_hdmi-rockchip: better clock selection logic and
+ dts-based rate list
+
+This contains traces of the following commits from the ChromeOS 3.14
+tree, which improve RF/EMI performance and detach the clock selection
+logic from the HDMI PHY configurations, plus support for configuring
+the allowed clock rates via device tree as they are dependent on
+PLL configuration and maybe even the PCB layout and other hardware things,
+eg. interference to wifi or such (EMI).
+
+Rates that were allowed previous to this patch are added as the fallback
+list if no dts configuration exists.
+
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: Adjust rockchip_mpll_cfg for 146.25
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: expand the informal mpll config
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: add slop to more tables
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: redo rockchip hdmi to allow slop
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: Use auto-generated tables
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: Fixup the clock to be what we expect
+CHROMIUM: drm/rockchip: hdmi: adjust cklvl & txlvl for RF/EMI
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: Set cur_ctr to 0 always
+CHROMIUM: drm: rockchip/dw_hdmi-rockchip: Decrease slop
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 272 +++++++++++++-------
+ 1 file changed, 175 insertions(+), 97 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 8677c8271678..bc6ffebb1fae 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -73,122 +73,141 @@ struct rockchip_hdmi {
+ 	struct clk *grf_clk;
+ 	struct dw_hdmi *hdmi;
+ 	struct phy *phy;
++	u32* rates;
++	u32 rates_cnt;
+ };
+ 
++#define CLK_SLOP(clk)		((clk) / 1000)
++#define CLK_PLUS_SLOP(clk)	((clk) + CLK_SLOP(clk))
++
+ #define to_rockchip_hdmi(x)	container_of(x, struct rockchip_hdmi, x)
+ 
++/* These were the rates allowed by the driver before rates list in device tree,
++ * so keep them around as a fallback */
++static const u32 dw_hdmi_fallback_rates[] = {
++	27000000,
++	36000000,
++	40000000,
++	54000000,
++	65000000,
++	66000000,
++	74250000,
++	83500000,
++	106500000,
++	108000000,
++	146250000,
++	148500000
++};
++
+ static const struct dw_hdmi_mpll_config rockchip_mpll_cfg[] = {
+ 	{
+-		27000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++		30666000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40f3, 0x0000 },
++		},
++	},  {
++		36800000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		36000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		46000000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		40000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		61333000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		54000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		73600000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		65000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		92000000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		66000000, {
+-			{ 0x013e, 0x0003},
+-			{ 0x217e, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		122666000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		74250000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		147200000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		83500000, {
+-			{ 0x0072, 0x0001},
++	},  {
++		184000000, {
++			{ 0x0051, 0x0002 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		108000000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		226666000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		106500000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		272000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		146250000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		340000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		148500000, {
+-			{ 0x0051, 0x0003},
+-			{ 0x214c, 0x0003},
+-			{ 0x4064, 0x0003}
++	},  {
++		600000000, {
++			{ 0x1a40, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
++	},  {
+ 		~0UL, {
+-			{ 0x00a0, 0x000a },
+-			{ 0x2001, 0x000f },
+-			{ 0x4002, 0x000f },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
+ 		},
+ 	}
+ };
+ 
+ static const struct dw_hdmi_curr_ctrl rockchip_cur_ctr[] = {
+-	/*      pixelclk    bpp8    bpp10   bpp12 */
++	/*      pixelclk     bpp8    bpp10   bpp12 */
+ 	{
+-		40000000,  { 0x0018, 0x0018, 0x0018 },
+-	}, {
+-		65000000,  { 0x0028, 0x0028, 0x0028 },
+-	}, {
+-		66000000,  { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		74250000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		83500000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		146250000, { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		148500000, { 0x0000, 0x0038, 0x0038 },
+-	}, {
+-		~0UL,      { 0x0000, 0x0000, 0x0000},
+-	}
++		600000000, { 0x0000, 0x0000, 0x0000 },
++	},  {
++		~0UL,      { 0x0000, 0x0000, 0x0000 },
++	},
+ };
+ 
+ static const struct dw_hdmi_phy_config rockchip_phy_config[] = {
+ 	/*pixelclk   symbol   term   vlev*/
+-	{ 74250000,  0x8009, 0x0004, 0x0272},
+-	{ 148500000, 0x802b, 0x0004, 0x028d},
+-	{ 297000000, 0x8039, 0x0005, 0x028d},
+-	{ ~0UL,	     0x0000, 0x0000, 0x0000}
++	{ CLK_PLUS_SLOP(74250000),  0x8009, 0x0004, 0x0272},
++	{ CLK_PLUS_SLOP(165000000), 0x802b, 0x0004, 0x0209},
++	{ CLK_PLUS_SLOP(297000000), 0x8039, 0x0005, 0x028d},
++	{ ~0UL,	                    0x0000, 0x0000, 0x0000}
+ };
+ 
+ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
+ {
+ 	struct device_node *np = hdmi->dev->of_node;
++	int rates_cnt;
+ 
+ 	hdmi->regmap = syscon_regmap_lookup_by_phandle(np, "rockchip,grf");
+ 	if (IS_ERR(hdmi->regmap)) {
+@@ -216,27 +235,55 @@ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
+ 		return PTR_ERR(hdmi->grf_clk);
+ 	}
+ 
++	if ((rates_cnt = of_property_count_u32_elems(np, "rockchip,hdmi-rates-hz")) > 0) {
++		int rv;
++		u32 *rates = devm_kmalloc_array(hdmi->dev, rates_cnt, sizeof(u32), GFP_KERNEL);
++		if (!rates)
++			return -ENOMEM;
++		rv = of_property_read_u32_array(np, "rockchip,hdmi-rates-hz", rates, rates_cnt);
++		if (rv)
++			return rv;
++		hdmi->rates = rates;
++		hdmi->rates_cnt = rates_cnt;
++	} else {
++		rates_cnt = ARRAY_SIZE(dw_hdmi_fallback_rates);
++		hdmi->rates = devm_kmalloc_array(hdmi->dev, rates_cnt, sizeof(u32), GFP_KERNEL);
++		if (!hdmi->rates)
++			return -ENOMEM;
++		memcpy(hdmi->rates, dw_hdmi_fallback_rates, rates_cnt * sizeof(u32));
++		hdmi->rates_cnt = rates_cnt;
++	}
++
++
+ 	return 0;
+ }
+ 
+ static enum drm_mode_status
+-dw_hdmi_rockchip_mode_valid(struct dw_hdmi *hdmi, void *data,
+-			    const struct drm_display_info *info,
++dw_hdmi_rockchip_encoder_mode_valid(struct drm_encoder *encoder,
+ 			    const struct drm_display_mode *mode)
+ {
+-	const struct dw_hdmi_mpll_config *mpll_cfg = rockchip_mpll_cfg;
++	struct rockchip_hdmi *hdmi = to_rockchip_hdmi(encoder);
+ 	int pclk = mode->clock * 1000;
+-	bool valid = false;
++	int num_rates = hdmi->rates_cnt;
+ 	int i;
+ 
+-	for (i = 0; mpll_cfg[i].mpixelclock != (~0UL); i++) {
+-		if (pclk == mpll_cfg[i].mpixelclock) {
+-			valid = true;
+-			break;
+-		}
++	/*
++	 * Pixel clocks we support are always < 2GHz and so fit in an
++	 * int.  We should make sure source rate does too so we don't get
++	 * overflow when we multiply by 1000.
++	 */
++	if (mode->clock > INT_MAX / 1000)
++		return MODE_BAD;
++
++	for (i = 0; i < num_rates; i++) {
++		int slop = CLK_SLOP(pclk);
++
++		if ((pclk >= hdmi->rates[i] - slop) &&
++		    (pclk <= hdmi->rates[i] + slop))
++			return MODE_OK;
+ 	}
+ 
+-	return (valid) ? MODE_OK : MODE_BAD;
++	return MODE_BAD;
+ }
+ 
+ static void dw_hdmi_rockchip_encoder_disable(struct drm_encoder *encoder)
+@@ -248,7 +295,39 @@ dw_hdmi_rockchip_encoder_mode_fixup(struct drm_encoder *encoder,
+ 				    const struct drm_display_mode *mode,
+ 				    struct drm_display_mode *adj_mode)
+ {
+-	return true;
++	struct rockchip_hdmi *hdmi = to_rockchip_hdmi(encoder);
++	int pclk = adj_mode->clock * 1000;
++	int best_diff = INT_MAX;
++	int best_clock = 0;
++	int slop;
++	int i;
++
++	/* Pick the best clock */
++	for (i = 0; i < hdmi->rates_cnt; i++) {
++		int diff = hdmi->rates[i] - pclk;
++
++		if (diff < 0)
++			diff = -diff;
++		if (diff < best_diff) {
++			best_diff = diff;
++			best_clock = hdmi->rates[i];
++
++			/* Bail early if we're exact */
++			if (best_diff == 0)
++				return true;
++		}
++	}
++
++	/* Double check that it's OK */
++	slop = CLK_SLOP(pclk);
++	if ((pclk >= best_clock - slop) && (pclk <= best_clock + slop)) {
++		adj_mode->clock = DIV_ROUND_UP(best_clock, 1000);
++		return true;
++	}
++
++	/* Shoudn't be here; we should have said rate wasn't valid */
++	dev_warn(hdmi->dev, "tried to set invalid rate %d\n", adj_mode->clock);
++	return false;
+ }
+ 
+ static void dw_hdmi_rockchip_encoder_mode_set(struct drm_encoder *encoder,
+@@ -304,6 +383,7 @@ dw_hdmi_rockchip_encoder_atomic_check(struct drm_encoder *encoder,
+ }
+ 
+ static const struct drm_encoder_helper_funcs dw_hdmi_rockchip_encoder_helper_funcs = {
++	.mode_valid = dw_hdmi_rockchip_encoder_mode_valid,
+ 	.mode_fixup = dw_hdmi_rockchip_encoder_mode_fixup,
+ 	.mode_set   = dw_hdmi_rockchip_encoder_mode_set,
+ 	.enable     = dw_hdmi_rockchip_encoder_enable,
+@@ -404,7 +484,6 @@ static struct rockchip_hdmi_chip_data rk3228_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3228_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg = rockchip_mpll_cfg,
+ 	.cur_ctr = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -421,7 +500,6 @@ static struct rockchip_hdmi_chip_data rk3288_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3288_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg   = rockchip_mpll_cfg,
+ 	.cur_ctr    = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -441,7 +519,6 @@ static struct rockchip_hdmi_chip_data rk3328_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3328_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg = rockchip_mpll_cfg,
+ 	.cur_ctr = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -459,7 +536,6 @@ static struct rockchip_hdmi_chip_data rk3399_chip_data = {
+ };
+ 
+ static const struct dw_hdmi_plat_data rk3399_hdmi_drv_data = {
+-	.mode_valid = dw_hdmi_rockchip_mode_valid,
+ 	.mpll_cfg   = rockchip_mpll_cfg,
+ 	.cur_ctr    = rockchip_cur_ctr,
+ 	.phy_config = rockchip_phy_config,
+@@ -557,6 +633,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+ 	 */
+ 	if (IS_ERR(hdmi->hdmi)) {
+ 		ret = PTR_ERR(hdmi->hdmi);
++		devm_kfree(hdmi->dev, hdmi->rates);
+ 		drm_encoder_cleanup(encoder);
+ 		clk_disable_unprepare(hdmi->vpll_clk);
+ 	}
+@@ -569,6 +646,7 @@ static void dw_hdmi_rockchip_unbind(struct device *dev, struct device *master,
+ {
+ 	struct rockchip_hdmi *hdmi = dev_get_drvdata(dev);
+ 
++	devm_kfree(hdmi->dev, hdmi->rates);
+ 	dw_hdmi_unbind(hdmi->hdmi);
+ 	clk_disable_unprepare(hdmi->vpll_clk);
+ }
+-- 
+2.37.1
+
+
+From 895f65c91f100e480785bb063f0951a8c280ea95 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Mon, 27 Aug 2018 19:00:50 +0000
+Subject: [PATCH 04/15] dts: rk3288: support for dedicating npll to a vop
+
+Add the VOP DCLKs to the assigned clocks list so their
+parents can be set in the dts include files for
+devices that do dedicate npll to a vop.
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 26b9bbe310af..3178adcc9f15 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -865,12 +865,14 @@
+ 		rockchip,grf = <&grf>;
+ 		#clock-cells = <1>;
+ 		#reset-cells = <1>;
+-		assigned-clocks = <&cru PLL_GPLL>, <&cru PLL_CPLL>,
++		assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>,
++				  <&cru PLL_GPLL>, <&cru PLL_CPLL>,
+ 				  <&cru PLL_NPLL>, <&cru ACLK_CPU>,
+ 				  <&cru HCLK_CPU>, <&cru PCLK_CPU>,
+ 				  <&cru ACLK_PERI>, <&cru HCLK_PERI>,
+ 				  <&cru PCLK_PERI>;
+-		assigned-clock-rates = <594000000>, <400000000>,
++		assigned-clock-rates = <0>, <0>,
++				       <594000000>, <400000000>,
+ 				       <500000000>, <300000000>,
+ 				       <150000000>, <75000000>,
+ 				       <300000000>, <150000000>,
+-- 
+2.37.1
+
+
+From caffe3444a02f2e63e8dc54d1a3a95a1d2688d01 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Mon, 27 Aug 2018 19:03:49 +0000
+Subject: [PATCH 05/15] dts: rk3288-veyron-chromebook: dedicate npll to
+ VOP0/HDMI + HDMI rates
+
+This enables flexible HDMI rates on the rk3288 chromebooks so that they
+actually work with displays (also others than a 1080p one) in the wild.
+
+The frequency list matches what ChromeOS allows.
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ .../boot/dts/rk3288-veyron-chromebook.dtsi    | 62 +++++++++++++++++++
+ 1 file changed, 62 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+index 05112c25176d..4d972bd6741c 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-chromebook.dtsi
+@@ -83,6 +83,68 @@
+ 	};
+ };
+ 
++&cru {
++	/* Dedicate NPLL for VOP0 / VOP_BIG for HDMI. */
++	rockchip,npll-for-vop = <0>;
++	/* The first assigned clocks are DCLK_VOP0 and DCLK_VOP1 */
++	assigned-clock-parents = <&cru PLL_NPLL>, <&cru PLL_GPLL>;
++};
++
++/* Delete the nodes that allow non-desirable VOP - connector links. That
++ * is the eDP cannot use vopb and HDMI cannot use vopl. */
++
++/delete-node/ &edp_in_vopb;
++/delete-node/ &vopb_out_edp;
++/delete-node/ &hdmi_in_vopl;
++/delete-node/ &vopl_out_hdmi;
++
++&hdmi {
++	/* These depend on NPLL being dedicated to HDMI use. */
++	rockchip,hdmi-rates-hz = <
++		25176471	/* for 25.175 MHz, 0.006% off */
++		25200000
++		27000000
++		28320000
++		30240000
++		31500000
++		32000000
++		33750000
++		36000000
++		40000000
++		49500000
++		50000000
++		54000000
++		57290323	/* for 57.284 MHz, .011 % off */
++		65000000
++		68250000
++		71000000
++		72000000
++		73250000
++		74250000
++		74437500	/* for 74.44 MHz, .003% off */
++		75000000
++		78750000
++		78800000
++		79500000
++		83500000
++		85500000
++		88750000
++		97750000
++		101000000
++		106500000
++		108000000
++		115500000
++		118666667	/* for 118.68 MHz, .011% off */
++		119000000
++		121714286	/* for 121.75 MHz, .029% off */
++		135000000
++		136800000	/* for 136.75 MHz, .037% off */
++		146250000
++		148500000
++		154000000
++		162000000 >;
++};
++
+ &rk808 {
+ 	vcc11-supply = <&vcc_5v>;
+ 
+-- 
+2.37.1
+
+
+From c79257261784d8073c5b8724e207fca26b6cd735 Mon Sep 17 00:00:00 2001
+From: SolidHal <hal@halemmerich.com>
+Date: Sun, 21 Oct 2018 16:40:15 -0500
+Subject: [PATCH 06/15] Added a second reset when having an issue reading the
+ emmc.
+
+The c201 emmc can be... touchy. Sometimes one full reset isn't
+enough to get it into a wokring state if it found it's way into
+a really bad state. Note that in my testing WITHOUT this patch,
+this only happens about once in just over 1600 reboots.
+
+--
+Edited by Urja Rannikko to actually limit the retries to once,
+and to apply to 4.20.
+--
+
+Signed-off-by: SolidHal <hal@halemmerich.com>
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ drivers/mmc/core/block.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 23fcb7a16605..50e94f5b1f8e 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -987,12 +987,14 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
+ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			 int type)
+ {
++	int retries = 1;
+ 	int err;
+ 
+ 	if (md->reset_done & type)
+ 		return -EEXIST;
+ 
+ 	md->reset_done |= type;
++retry:
+ 	err = mmc_hw_reset(host->card);
+ 	/* Ensure we switch back to the correct partition */
+ 	if (err) {
+@@ -1010,6 +1012,10 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			return -ENODEV;
+ 		}
+ 	}
++	/* Retry once because the C201 eMMC can be touchy */
++	if ((err) && (retries--)) {
++		goto retry;
++	}
+ 	return err;
+ }
+ 
+-- 
+2.37.1
+
+
+From e86733786ffc2e065636df63b5edcf57612a3870 Mon Sep 17 00:00:00 2001
+From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
+Date: Tue, 9 Oct 2018 22:01:07 +0200
+Subject: [PATCH 07/15] block: partitions: efi: Ignore bizarre Chromebook GPT
+ partitions
+
+This patch is based on @SolidHal work here :
+https://raw.githubusercontent.com/SolidHal/PrawnOS/master/resources/BuildResources/patches-tested/kernel/0001-block-partitions-efi-Add-support-for-IGNOREME-GPT-si.patch
+
+Here's the initial commit message :
+
+8<---
+
+This patch adds support for a special GPT header signature marker (using
+the string 'IGNOREME' instead of the spec's 'EFI PART'). This tells the
+kernel to ignore this GPT completely and look at the other one instead.
+Since the kernel always prefers the primary GPT anyway, all we really
+need to do effectively is to check whether the primary GPT is marked
+'IGNOREME' and force evaluation of the secondary one in that case.
+
+Borrowed from the chrome os 3.14 kernel, the commit can be found here:
+https://chromium.googlesource.com/chromiumos/third_party/kernel/+/abba28d0a1b7361da6e2023352e92687166ca30d
+
+Also bundled in this commit
+https://chromium.googlesource.com/chromiumos/third_party/kernel/+/bd0c62c7de0c8a63314b7955e5718d8f6192f9d2%5E%21/#F0
+Which is a small compiler warning fix for the above patch
+
+This patch fixes how the kernel detects and handles certain mmc
+manufatures devices, and allows the partitions on the mmc to be bootable
+and mountable.
+
+>8---
+
+Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
+---
+ block/partitions/efi.c | 33 +++++++++++++++++++++++----------
+ block/partitions/efi.h |  3 ++-
+ 2 files changed, 25 insertions(+), 11 deletions(-)
+
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 5e9be13a56a8..8cdfcc48558c 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -328,23 +328,34 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
+  * @lba: logical block address of the GPT header to test
+  * @gpt: GPT header ptr, filled on return.
+  * @ptes: PTEs ptr, filled on return.
++ * @ignored is filled on return with 1 if this is an IGNOREME GPT,
++ *     0 otherwise. May be NULL.
+  *
+  * Description: returns 1 if valid,  0 on error.
+  * If valid, returns pointers to newly allocated GPT header and PTEs.
+  */
+ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+-			gpt_header **gpt, gpt_entry **ptes)
++			gpt_header **gpt, gpt_entry **ptes, int *ignored)
+ {
+ 	u32 crc, origcrc;
+ 	u64 lastlba, pt_size;
+ 
++	if (ignored)
++		*ignored = 0;
+ 	if (!ptes)
+ 		return 0;
+ 	if (!(*gpt = alloc_read_gpt_header(state, lba)))
+ 		return 0;
+ 
+ 	/* Check the GUID Partition Table signature */
+-	if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
++
++	if (le64_to_cpu((*gpt)->signature) == GPT_HEADER_SIGNATURE_IGNORED) {
++		pr_debug("GUID Partition Table at LBA %llu marked IGNOREME\n",
++						(unsigned long long)lba);
++		if (ignored)
++			*ignored = 1;
++		goto fail;
++	} else if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
+ 		pr_debug("GUID Partition Table Header signature is wrong:"
+ 			 "%lld != %lld\n",
+ 			 (unsigned long long)le64_to_cpu((*gpt)->signature),
+@@ -581,7 +592,7 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
+ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 			  gpt_entry **ptes)
+ {
+-	int good_pgpt = 0, good_agpt = 0, good_pmbr = 0;
++	int good_pgpt = 0, good_agpt = 0, good_pmbr = 0, pgpt_ignored = 0;
+ 	gpt_header *pgpt = NULL, *agpt = NULL;
+ 	gpt_entry *pptes = NULL, *aptes = NULL;
+ 	legacy_mbr *legacymbr;
+@@ -613,13 +624,13 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 	}
+ 
+ 	good_pgpt = is_gpt_valid(state, GPT_PRIMARY_PARTITION_TABLE_LBA,
+-				 &pgpt, &pptes);
++			 &pgpt, &pptes, &pgpt_ignored);
+         if (good_pgpt)
+ 		good_agpt = is_gpt_valid(state,
+ 					 le64_to_cpu(pgpt->alternate_lba),
+-					 &agpt, &aptes);
+-        if (!good_agpt && force_gpt)
+-                good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
++					 &agpt, &aptes, NULL);
++	if (!good_agpt && (force_gpt || pgpt_ignored))
++		good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes, NULL);
+ 
+ 	if (!good_agpt && force_gpt && fops->alternative_gpt_sector) {
+ 		sector_t agpt_sector;
+@@ -628,14 +639,15 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 		err = fops->alternative_gpt_sector(disk, &agpt_sector);
+ 		if (!err)
+ 			good_agpt = is_gpt_valid(state, agpt_sector,
+-						 &agpt, &aptes);
++						 &agpt, &aptes, NULL);
+ 	}
+ 
+         /* The obviously unsuccessful case */
+         if (!good_pgpt && !good_agpt)
+                 goto fail;
+ 
+-        compare_gpts(pgpt, agpt, lastlba);
++	if (!pgpt_ignored)
++		compare_gpts(pgpt, agpt, lastlba);
+ 
+         /* The good cases */
+         if (good_pgpt) {
+@@ -652,7 +664,8 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+                 *ptes = aptes;
+                 kfree(pgpt);
+                 kfree(pptes);
+-		pr_warn("Primary GPT is invalid, using alternate GPT.\n");
++	pr_warn("Primary GPT is %s, using alternate GPT.\n",
++		pgpt_ignored ? "being ignored" : "invalid");
+                 return 1;
+         }
+ 
+diff --git a/block/partitions/efi.h b/block/partitions/efi.h
+index 84b9f36b9e47..09726227e891 100644
+--- a/block/partitions/efi.h
++++ b/block/partitions/efi.h
+@@ -26,7 +26,8 @@
+ #define GPT_MBR_PROTECTIVE  1
+ #define GPT_MBR_HYBRID      2
+ 
+-#define GPT_HEADER_SIGNATURE 0x5452415020494645ULL
++#define GPT_HEADER_SIGNATURE		0x5452415020494645ULL	/* 'EFI PART' */
++#define GPT_HEADER_SIGNATURE_IGNORED	0x454d45524f4e4749ULL	/* 'IGNOREME' */
+ #define GPT_HEADER_REVISION_V1 0x00010000
+ #define GPT_PRIMARY_PARTITION_TABLE_LBA 1
+ 
+-- 
+2.37.1
+
+
+From 8723aea8ff2c9cfe1cb62a4ff0b43fd85da793f7 Mon Sep 17 00:00:00 2001
+From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
+Date: Tue, 30 Oct 2018 22:44:54 +0100
+Subject: [PATCH 08/15] mmc: Added a flag to disable cache flush during reset
+
+The ASUS Chromebook suffer from 10 minutes long hang, when trying
+to flush the cache of the eMMC, in order to recover from eMMC init
+issues when booting the system.
+
+A new flag "no-recovery-cache-flush" whose purpose is to disable
+cache flush during recovery reset, has been added.
+
+This work is adapted from @SolidHal work, which is available here :
+https://github.com/SolidHal/PrawnOS/blob/develop-4.19/resources/BuildResources/patches-tested/kernel/Don-t-try-to-flush-cache-on-reset.patch
+
+Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
+---
+ drivers/mmc/core/host.c  |  2 ++
+ drivers/mmc/core/mmc.c   | 18 ++++++++++++++----
+ include/linux/mmc/host.h |  1 +
+ 3 files changed, 17 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 2ed2b4d5e5a5..faf8ca943506 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -410,6 +410,8 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (device_property_read_bool(dev, "no-mmc-hs400"))
+ 		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
+ 				 MMC_CAP2_HS400_ES);
++	if (device_property_read_bool(dev, "no-recovery-cache-flush"))
++		host->caps2 |= MMC_CAP2_NO_RECOVERY_CACHE_FLUSH;
+ 
+ 	/* Must be after "non-removable" check */
+ 	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index efa95dc4fc4e..c4f2dba2e92e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2220,6 +2220,12 @@ static int mmc_runtime_resume(struct mmc_host *host)
+ 	return 0;
+ }
+ 
++static inline int mmc_can_flush_during_recovery(
++	struct mmc_host *host)
++{
++	return (host->caps2 & MMC_CAP2_NO_RECOVERY_CACHE_FLUSH) == 0;
++}
++
+ static int mmc_can_reset(struct mmc_card *card)
+ {
+ 	u8 rst_n_function;
+@@ -2234,11 +2240,15 @@ static int _mmc_hw_reset(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
+ 
+-	/*
+-	 * In the case of recovery, we can't expect flushing the cache to work
+-	 * always, but we have a go and ignore errors.
++	/* Using a "Cache flush" during recovery events seems...
++	 * "dubious" at best, and generate significant issues on
++	 * some platforms, like 10 minutes hang up, at worst.
++	 * I'm keeping this line because the old code did it but...
++	 * feel free to double check if that's needed at all.
+ 	 */
+-	_mmc_flush_cache(host);
++
++	if (mmc_can_flush_during_recovery(host))
++		_mmc_flush_cache(host);
+ 
+ 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
+ 	     mmc_can_reset(card)) {
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7afb57cab00b..7c8a290f4538 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -402,6 +402,7 @@ struct mmc_host {
+ #define MMC_CAP2_CRYPTO		0
+ #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
++#define MMC_CAP2_NO_RECOVERY_CACHE_FLUSH	(1 << 29)	/* Do not flush the device cache when recovering */
+ 
+ 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
+ 
+-- 
+2.37.1
+
+
+From bb628aa3314808774c1c1644ed2a0d2a322bff8a Mon Sep 17 00:00:00 2001
+From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
+Date: Thu, 1 Nov 2018 21:31:26 +0100
+Subject: [PATCH 09/15] arm: dts: veyron: Added a flag to disable cache flush
+ during reset
+
+Flushing the MMC cache of ASUS Chromebooks during initialization or
+"recovery" generates 10 minutes hangup, according to @SolidHal.
+
+This is an adaptation of @SolidHal, in order to pinpoint the fix to
+Veyron Chromebooks, and avoiding issues other RK3288 boards.
+
+Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 54a6838d73f5..71d3d0345f08 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -153,6 +153,7 @@
+ 	mmc-hs200-1_8v;
+ 	mmc-pwrseq = <&emmc_pwrseq>;
+ 	non-removable;
++	no-recovery-cache-flush;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
+ };
+-- 
+2.37.1
+
+
+From a7e3ed441e45aecd6629506f4e932b4f27a05e91 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Mon, 18 Mar 2019 22:40:52 +0000
+Subject: [PATCH 10/15] dwc2 veyron otg mode hack
+
+---
+ arch/arm/boot/dts/rk3288-veyron.dtsi |  2 +-
+ drivers/usb/dwc2/core.c              |  2 +-
+ drivers/usb/dwc2/core.h              |  1 +
+ drivers/usb/dwc2/debugfs.c           | 50 ++++++++++++++++++++++++++++
+ drivers/usb/dwc2/platform.c          |  2 ++
+ 5 files changed, 55 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index 71d3d0345f08..622b082832b5 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -436,8 +436,8 @@
+ 
+ 	assigned-clocks = <&cru SCLK_USBPHY480M_SRC>;
+ 	assigned-clock-parents = <&usbphy0>;
+-	dr_mode = "host";
+ 	snps,need-phy-for-wake;
++	/* dr_mode = "host"; */
+ };
+ 
+ &vopb {
+diff --git a/drivers/usb/dwc2/core.c b/drivers/usb/dwc2/core.c
+index cf0bcd0dc320..12fe706171ec 100644
+--- a/drivers/usb/dwc2/core.c
++++ b/drivers/usb/dwc2/core.c
+@@ -577,7 +577,7 @@ void dwc2_force_mode(struct dwc2_hsotg *hsotg, bool host)
+  *
+  * @hsotg: Programming view of DWC_otg controller
+  */
+-static void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg)
++void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg)
+ {
+ 	u32 gusbcfg;
+ 
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index 88c337bf564f..d9127708115a 100644
+--- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -1323,6 +1323,7 @@ int dwc2_phy_init(struct dwc2_hsotg *hsotg, bool select_phy);
+ 
+ void dwc2_force_mode(struct dwc2_hsotg *hsotg, bool host);
+ void dwc2_force_dr_mode(struct dwc2_hsotg *hsotg);
++void dwc2_clear_force_mode(struct dwc2_hsotg *hsotg);
+ 
+ bool dwc2_is_controller_alive(struct dwc2_hsotg *hsotg);
+ 
+diff --git a/drivers/usb/dwc2/debugfs.c b/drivers/usb/dwc2/debugfs.c
+index 1d72ece9cfe4..3e0a09c14c97 100644
+--- a/drivers/usb/dwc2/debugfs.c
++++ b/drivers/usb/dwc2/debugfs.c
+@@ -114,6 +114,55 @@ static const struct file_operations testmode_fops = {
+ 	.release	= single_release,
+ };
+ 
++static ssize_t cur_mode_write(struct file *file, const char __user *ubuf, size_t
++		count, loff_t *ppos)
++{
++	struct seq_file		*s = file->private_data;
++	struct dwc2_hsotg	*hsotg = s->private;
++	int mode = 0;
++	char			buf[32];
++
++	if (copy_from_user(&buf, ubuf, min_t(size_t, sizeof(buf) - 1, count)))
++		return -EFAULT;
++
++	if (!strncmp(buf, "device", 6))
++		mode = 1;
++	else if (!strncmp(buf, "host", 4))
++		mode = 2;
++	else
++		mode = 0; /* otg/clear */
++
++	dwc2_clear_force_mode(hsotg);
++	switch (mode) {
++		case 1: dwc2_force_mode(hsotg, false); break;
++		case 2: dwc2_force_mode(hsotg, true); break;
++	}
++	return count;
++}
++
++
++static int cur_mode_show(struct seq_file *s, void *unused)
++{
++	struct dwc2_hsotg *hsotg = s->private;
++	seq_puts(s, dwc2_is_device_mode(hsotg) ? "device\n" : "host\n");
++	return 0;
++}
++
++
++static int cur_mode_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, cur_mode_show, inode->i_private);
++}
++
++static const struct file_operations cur_mode_fops = {
++	.owner		= THIS_MODULE,
++	.open		= cur_mode_open,
++	.write		= cur_mode_write,
++	.read		= seq_read,
++	.llseek		= seq_lseek,
++	.release	= single_release,
++};
++
+ /**
+  * state_show - debugfs: show overall driver and device state.
+  * @seq: The seq file to write to.
+@@ -300,6 +349,7 @@ static void dwc2_hsotg_create_debug(struct dwc2_hsotg *hsotg)
+ 	debugfs_create_file("state", 0444, root, hsotg, &state_fops);
+ 	debugfs_create_file("testmode", 0644, root, hsotg, &testmode_fops);
+ 	debugfs_create_file("fifo", 0444, root, hsotg, &fifo_fops);
++	debugfs_create_file("cur_mode", 0644, root, hsotg, &cur_mode_fops);
+ 
+ 	/* Create one file for each out endpoint */
+ 	for (epidx = 0; epidx < hsotg->num_of_eps; epidx++) {
+diff --git a/drivers/usb/dwc2/platform.c b/drivers/usb/dwc2/platform.c
+index c8ba87df7abe..4b06220f3118 100644
+--- a/drivers/usb/dwc2/platform.c
++++ b/drivers/usb/dwc2/platform.c
+@@ -531,6 +531,8 @@ static int dwc2_driver_probe(struct platform_device *dev)
+ 	 * other time after this.
+ 	 */
+ 	dwc2_force_dr_mode(hsotg);
++	/* HACK: Always start in host mode, even if you think you're an otg device :P */
++	dwc2_force_mode(hsotg, true);
+ 
+ 	retval = dwc2_init_params(hsotg);
+ 	if (retval)
+-- 
+2.37.1
+
+
+From 09e974c45ebeb6f1da19c31e3e03abc66b841d2c Mon Sep 17 00:00:00 2001
+From: Hal Emmerich <hal@halemmerich.com>
+Date: Wed, 21 Aug 2019 16:52:41 -0500
+Subject: [PATCH 11/15] Fix ath9k dwc2 init frame overruns
+
+[ by Urja Rannikko: changed to log message to something more sensible. ]
+
+This is a workaround for ar9271 drvices using the open ath9k firmware
+With the dwc2 usb driver these endpoints end up throwing piles of
+frame overrun errors and prevent the ath9k firmware from communicating
+properly with the c201
+
+This fix elongates the microframes by 4 so the dwc2 and ath9k devices
+communicate properly. In my testing this did not impact network speeds.
+---
+ drivers/usb/dwc2/hcd_queue.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/usb/dwc2/hcd_queue.c b/drivers/usb/dwc2/hcd_queue.c
+index 24beff610cf2..fdbecdcc292e 100644
+--- a/drivers/usb/dwc2/hcd_queue.c
++++ b/drivers/usb/dwc2/hcd_queue.c
+@@ -1558,6 +1558,16 @@ static void dwc2_qh_init(struct dwc2_hsotg *hsotg, struct dwc2_qh *qh,
+ 			device_ns += dwc_tt->usb_tt->think_time;
+ 		qh->device_us = NS_TO_US(device_ns);
+ 
++    //Only enable workaround for highspeed devices, since only low and full speed devices so split, we can just check split
++    //The packets that fail right after the firmware is transferred are on an interrupt ep so we can use that to further narrow it down
++    //The ath9k device has issues with ep 3 and ep4
++    if(!do_split && !ep_is_isoc && ep_is_int && (urb->pipe_info.ep_num == 3 || urb->pipe_info.ep_num == 4)){
++      if (urb->interval == 1){
++        urb->interval = 4;
++        dev_info(hsotg->dev, "ath9k workaround: set usb urb interval to %d\n", urb->interval);
++      }
++    }
++
+ 		qh->device_interval = urb->interval;
+ 		qh->host_interval = urb->interval * (do_split ? 8 : 1);
+ 
+-- 
+2.37.1
+
+
+From 2aa6c06c6c98e4858e2b83e1b48704c7686a498c Mon Sep 17 00:00:00 2001
+From: barzur <boris@konbu.org>
+Date: Fri, 12 Jul 2019 11:33:32 +0900
+Subject: [PATCH 12/15] usb/dwc2/hcd: channel halt may not be an error
+
+Truncating the data was causing null pointer exceptions in memcpy,
+let's be more careful.
+
+Addendum by Urja Rannikko:
+
+This was reported as a pull request on my linux github repo and it came
+with this reproducer & notes:
+-- begin --
+I sometimes get kernel oops when USB tethering.
+Here is how to repro:
+* create high load on the CPU: I build a kernel with -j6;
+* saturate your cdc_ether connection to the phone (I use netcat on both sides
+  to do so, with termux on android);
+
+I tracked down the issue to buffers getting truncated, the driver extracting
+a target address from the end of the buffer (weird) & memcpy to a non validated
+address.
+
+I've fixed it by validating the address we write to & stopped treating
+un-explained channel closure as errors. I guess the channel is closed due to a
+timeout (maybe?), caused by heavy context switching on the machine.
+
+I've been testing the following patch for ~1 week and it seems to work well.
+-- end --
+
+I do not have a suitable phone to reproduce this with so I cant personally
+say if it works and I dont 100% understand it, but I looked at the patch
+and I think it looks okay-ish (tho maybe should be two patches), so in the
+meantime I'm including it here.
+---
+ drivers/usb/dwc2/hcd.c      | 3 ++-
+ drivers/usb/dwc2/hcd_intr.c | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/usb/dwc2/hcd.c b/drivers/usb/dwc2/hcd.c
+index 3f107a06817d..3a589b6106e9 100644
+--- a/drivers/usb/dwc2/hcd.c
++++ b/drivers/usb/dwc2/hcd.c
+@@ -2486,7 +2486,8 @@ static void dwc2_free_dma_aligned_buffer(struct urb *urb)
+ 		else
+ 			length = urb->actual_length;
+ 
+-		memcpy(stored_xfer_buffer, urb->transfer_buffer, length);
++		if (stored_xfer_buffer)
++			memcpy(stored_xfer_buffer, urb->transfer_buffer, length);
+ 	}
+ 	kfree(urb->transfer_buffer);
+ 	urb->transfer_buffer = stored_xfer_buffer;
+diff --git a/drivers/usb/dwc2/hcd_intr.c b/drivers/usb/dwc2/hcd_intr.c
+index d5f4ec1b73b1..5299f4191096 100644
+--- a/drivers/usb/dwc2/hcd_intr.c
++++ b/drivers/usb/dwc2/hcd_intr.c
+@@ -1965,7 +1965,8 @@ static void dwc2_hc_chhltd_intr_dma(struct dwc2_hsotg *hsotg,
+ 					"hcint 0x%08x, intsts 0x%08x\n",
+ 					chan->hcint,
+ 					dwc2_readl(hsotg, GINTSTS));
+-				goto error;
++				dwc2_halt_channel(hsotg, chan, qtd,
++					DWC2_HC_XFER_PERIODIC_INCOMPLETE);
+ 			}
+ 		}
+ 	} else {
+-- 
+2.37.1
+
+
+From c80d04c858b934b5a57b594108a99944d1afcc81 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Tue, 8 Oct 2019 11:03:37 +0000
+Subject: [PATCH 13/15] drm/panel: edp: Extend Innolux N116BGE mode info for
+ ~60Hz from 74.25 Mhz
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ drivers/gpu/drm/panel/panel-edp.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/panel/panel-edp.c b/drivers/gpu/drm/panel/panel-edp.c
+index 701a258d2e11..b0ee655e4ef4 100644
+--- a/drivers/gpu/drm/panel/panel-edp.c
++++ b/drivers/gpu/drm/panel/panel-edp.c
+@@ -1284,16 +1284,25 @@ static const struct panel_desc innolux_n116bca_ea1 = {
+  * porch, back porch, or sync length.  For now we'll leave a single setting
+  * here which allows a bit of tweaking of the pixel clock at the expense of
+  * refresh rate.
++ *
++ * Experimental testing with one panel suggests that the split among
++ * front/back/sync is not important, but the panel is not stable
++ * at htotal less than 1520 (atleast when running at 74.25 Mhz).
++ *
++ * There exists an experimental mode that gives very close to 60 Hz mode
++ * from 74.25 Mhz with htotal 1543 and vtotal 802 - we allow the
++ * hfront_porch and vback_porch to be adjusted to reach that mode.
++ *
+  */
+ static const struct display_timing innolux_n116bge_timing = {
+ 	.pixelclock = { 72600000, 76420000, 80240000 },
+ 	.hactive = { 1366, 1366, 1366 },
+-	.hfront_porch = { 136, 136, 136 },
++	.hfront_porch = { 87, 136, 136 },
+ 	.hback_porch = { 60, 60, 60 },
+ 	.hsync_len = { 30, 30, 30 },
+ 	.vactive = { 768, 768, 768 },
+ 	.vfront_porch = { 8, 8, 8 },
+-	.vback_porch = { 12, 12, 12 },
++	.vback_porch = { 12, 12, 14 },
+ 	.vsync_len = { 12, 12, 12 },
+ 	.flags = DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_HSYNC_LOW,
+ };
+-- 
+2.37.1
+
+
+From b0da084e1d16f3e8712580333ad2d0f1e18be27d Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Tue, 8 Oct 2019 11:12:33 +0000
+Subject: [PATCH 14/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
+ for ~60Hz
+
+This is an experimental mode that gets very close to 60Hz (60.00067..)
+from the available clock of 74.25Mhz on an rk3288. The mode
+has htotal 1543 and vtotal 802.
+
+Signed-off-by: Urja Rannikko <urjaman@gmail.com>
+---
+ arch/arm/boot/dts/rk3288-veyron-edp.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-veyron-edp.dtsi b/arch/arm/boot/dts/rk3288-veyron-edp.dtsi
+index 32c0f10765dd..ea20818202fc 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-edp.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-edp.dtsi
+@@ -62,13 +62,13 @@
+ 		panel-timing {
+ 			clock-frequency = <74250000>;
+ 			hactive = <1366>;
+-			hfront-porch = <136>;
++			hfront-porch = <87>;
+ 			hback-porch = <60>;
+ 			hsync-len = <30>;
+ 			hsync-active = <0>;
+ 			vactive = <768>;
+ 			vfront-porch = <8>;
+-			vback-porch = <12>;
++			vback-porch = <14>;
+ 			vsync-len = <12>;
+ 			vsync-active = <0>;
+ 		};
+-- 
+2.37.1
+
+
+From 5a64110028e7e899f7f51ee9df4520658357bbbb Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Tue, 28 Sep 2021 20:23:13 +0300
+Subject: [PATCH 15/15] Revert "clk: divider: Implement and wire up
+ .determine_rate by default"
+
+This reverts commit 69a00fb3d6970681c15a23595ec54233ce10295c.
+That broke eMMC detection (error -110) on veyron speedy.
+Why is still an open question but for now i'm doing this revert
+in my tree to be able to test the rest of 5.15 rc's.
+---
+ drivers/clk/clk-divider.c | 23 -----------------------
+ 1 file changed, 23 deletions(-)
+
+diff --git a/drivers/clk/clk-divider.c b/drivers/clk/clk-divider.c
+index f6b2bf558486..87ba4966b0e8 100644
+--- a/drivers/clk/clk-divider.c
++++ b/drivers/clk/clk-divider.c
+@@ -446,27 +446,6 @@ static long clk_divider_round_rate(struct clk_hw *hw, unsigned long rate,
+ 				  divider->width, divider->flags);
+ }
+ 
+-static int clk_divider_determine_rate(struct clk_hw *hw,
+-				      struct clk_rate_request *req)
+-{
+-	struct clk_divider *divider = to_clk_divider(hw);
+-
+-	/* if read only, just return current value */
+-	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
+-		u32 val;
+-
+-		val = clk_div_readl(divider) >> divider->shift;
+-		val &= clk_div_mask(divider->width);
+-
+-		return divider_ro_determine_rate(hw, req, divider->table,
+-						 divider->width,
+-						 divider->flags, val);
+-	}
+-
+-	return divider_determine_rate(hw, req, divider->table, divider->width,
+-				      divider->flags);
+-}
+-
+ int divider_get_val(unsigned long rate, unsigned long parent_rate,
+ 		    const struct clk_div_table *table, u8 width,
+ 		    unsigned long flags)
+@@ -522,7 +501,6 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
+ const struct clk_ops clk_divider_ops = {
+ 	.recalc_rate = clk_divider_recalc_rate,
+ 	.round_rate = clk_divider_round_rate,
+-	.determine_rate = clk_divider_determine_rate,
+ 	.set_rate = clk_divider_set_rate,
+ };
+ EXPORT_SYMBOL_GPL(clk_divider_ops);
+@@ -530,7 +508,6 @@ EXPORT_SYMBOL_GPL(clk_divider_ops);
+ const struct clk_ops clk_divider_ro_ops = {
+ 	.recalc_rate = clk_divider_recalc_rate,
+ 	.round_rate = clk_divider_round_rate,
+-	.determine_rate = clk_divider_determine_rate,
+ };
+ EXPORT_SYMBOL_GPL(clk_divider_ro_ops);
+ 
+-- 
+2.37.1
+
