@@ -2,7 +2,7 @@
 # Hacker: Urja ;P
 
 pkgbase=linux-apu
-pkgver=5.10.129.r8.gf9fd4a10ff75
+pkgver=5.10.134
 pkgrel=1
 pkgdesc='LTS Linux (with APU spice)'
 url="https://www.kernel.org/"
@@ -12,32 +12,31 @@ makedepends=(
   bc kmod libelf cpio perl tar xz xmlto git
 )
 options=('!strip')
-_srcname=linux
-GITTAG=$(cat /home/urjaman/bulk/kernel-ops/apu-lts/git-tag)
+_srcname=linux-5.10
 source=(
- "linux::git+file:///home/urjaman/bulk/kernel-ops/linux#tag=$GITTAG"
-  config         # the main kernel config file
+	"https://www.kernel.org/pub/linux/kernel/v5.x/${_srcname}.tar.xz"
+        "https://www.kernel.org/pub/linux/kernel/v5.x/patch-${pkgver}.xz"
+	'apu.patch'
+	config         # the main kernel config file
   90-linux.hook # hook to update the in-flash kernel (on coreboot if needed...)
 )
-
-sha256sums=('SKIP'
-            'SKIP'
-	    'SKIP'
-           )
-
-
-pkgver() {
-  cd "${_srcname}"
-  git describe --long --tags --first-parent --match 'v*' |  sed 's/v//;s/\([^-]*-g\)/r\1/;s/-/./g'
-}
 
 prepare() {
   cd $_srcname
 
-  echo "Setting version..."
-  scripts/setlocalversion --save-scmversion
-  echo "-$pkgrel" > localversion.10-pkgrel
-  echo "${pkgbase#linux}" > localversion.20-pkgname
+  # hack to allow git apply to work on non-git files while in a git directory
+  export GIT_DIR=/var/empty
+
+  # add upstream patch
+  git apply --whitespace=nowarn ../patch-${pkgver}
+
+  # APU patchset
+  git apply ../apu.patch
+
+  unset GIT_DIR
+
+  # Append (if -rc*) or set ${_xname}-${pkgrel} as extraversion
+  sed -ri "s/^(EXTRAVERSION =) ?(-rc[^-]*|).*/\1 \2apu-${pkgrel}/" Makefile
 
   echo "Setting config..."
   cat "${srcdir}/config" > ./.config
@@ -99,3 +98,9 @@ for _p in "${pkgname[@]}"; do
 done
 
 # vim:set ts=8 sts=2 sw=2 et:
+
+sha256sums=('dcdf99e43e98330d925016985bfbc7b83c66d367b714b2de0cbbfcbf83d8ca43'
+            '019b136e496a1d5f6fcba3ee504b0ca2bbc72930f44c72bfc2c7ac582cd7c702'
+            '4a5e67e5e91d930e52c269c75c3d30323007c502e3e6f26fb4d56e1990ce2f2a'
+            '62071ce09f532c76334aa5ac9d499ac678264d2e503396ca094644b83149db93'
+            '082385d0802ab8290564df1f0973ce82cc328bc438bf91abfa5a8df40401e417')

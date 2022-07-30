@@ -13,7 +13,7 @@ def subc(*args, **kwargs):
         sys.exit(1)
     return c.stdout
 
-def adjust_pkgbuild(dir, ver):
+def adjust_pkgbuild(dir, ver, rel):
     b = dir + '/PKGBUILD'
 
     with open(b) as f:
@@ -27,12 +27,15 @@ def adjust_pkgbuild(dir, ver):
                 L = L[:-1]
             c1 = "_srcname="
             c2 = "pkgver="
+            c3 = "pkgrel="
             brk1 = "md5sums=("
             brk2 = "sha256sums=("
             if L.startswith(c1):
                 f.write(f'{c1}linux-{vv[0]}.{vv[1]}\n')
             elif L.startswith(c2):
                 f.write(f'{c2}{ver}\n')
+            elif L.startswith(c3):
+                f.write(f'{c3}{rel}\n')
             elif L.startswith(brk1) or L.startswith(brk2):
                 break
             else:
@@ -48,10 +51,11 @@ if len(sys.argv) == 1:
 setname,ver = tag.split(sep='-',maxsplit=1)
 
 if "-v" in ver:
-    ver,_ = ver.rsplit(sep="-v",maxsplit=1)
+    ver,rel = ver.rsplit(sep="-v",maxsplit=1)
+else:
+    rel = 1
 
 pkgbdir = os.path.realpath(pkgbdir)
-
 patchname = pkgbdir + '/' + setname + '.patch'
 
 os.chdir("linux")
@@ -65,6 +69,6 @@ print(f"{count} patches -> {patchname}")
 with open(patchname, 'wb') as f:
     subc(["git","format-patch","--stdout", range], stdout=f)
 
-adjust_pkgbuild(pkgbdir, ver)
+adjust_pkgbuild(pkgbdir, ver, rel)
 os.chdir(pkgbdir)
 os.system("makepkg -g >> PKGBUILD")

@@ -1,0 +1,488 @@
+From 0568046598c0b57313548b8a618a8e0c291a6a6d Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 13:46:54 +0300
+Subject: [PATCH 1/8] 402-ath_regd_optional
+
+---
+ drivers/net/wireless/ath/Kconfig |  3 +++
+ drivers/net/wireless/ath/regd.c  | 20 ++++++++++++++++++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/drivers/net/wireless/ath/Kconfig b/drivers/net/wireless/ath/Kconfig
+index d88edbf1bea3..8525ba2bea97 100644
+--- a/drivers/net/wireless/ath/Kconfig
++++ b/drivers/net/wireless/ath/Kconfig
+@@ -23,6 +23,9 @@ config WLAN_VENDOR_ATH
+ 
+ if WLAN_VENDOR_ATH
+ 
++config ATH_USER_REGD
++	bool "Do not enforce EEPROM regulatory restrictions"
++
+ config ATH_DEBUG
+ 	bool "Atheros wireless debugging"
+ 	help
+diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
+index 20f4f8ea9f89..0c172f3c0646 100644
+--- a/drivers/net/wireless/ath/regd.c
++++ b/drivers/net/wireless/ath/regd.c
+@@ -24,6 +24,7 @@
+ #include "regd_common.h"
+ 
+ static int __ath_regd_init(struct ath_regulatory *reg);
++static struct reg_dmn_pair_mapping *ath_get_regpair(int regdmn);
+ 
+ /*
+  * This is a set of common rules used by our world regulatory domains.
+@@ -116,6 +117,9 @@ static const struct ieee80211_regdomain ath_world_regdom_67_68_6A_6C = {
+ 
+ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
+ {
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return true;
++
+ 	if (IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_CERT_TESTING))
+ 		return true;
+ 
+@@ -188,6 +192,9 @@ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
+ 
+ static bool ath_reg_dyn_country_user_allow(struct ath_regulatory *reg)
+ {
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return true;
++
+ 	if (!IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_REG_HINTS))
+ 		return false;
+ 	if (!dynamic_country_user_possible(reg))
+@@ -345,6 +352,9 @@ ath_reg_apply_beaconing_flags(struct wiphy *wiphy,
+ 	struct ieee80211_channel *ch;
+ 	unsigned int i;
+ 
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return;
++
+ 	for (band = 0; band < NUM_NL80211_BANDS; band++) {
+ 		if (!wiphy->bands[band])
+ 			continue;
+@@ -378,6 +388,9 @@ ath_reg_apply_ir_flags(struct wiphy *wiphy,
+ {
+ 	struct ieee80211_supported_band *sband;
+ 
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return;
++
+ 	sband = wiphy->bands[NL80211_BAND_2GHZ];
+ 	if (!sband)
+ 		return;
+@@ -407,6 +420,9 @@ static void ath_reg_apply_radar_flags(struct wiphy *wiphy,
+ 	struct ieee80211_channel *ch;
+ 	unsigned int i;
+ 
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return;
++
+ 	if (!wiphy->bands[NL80211_BAND_5GHZ])
+ 		return;
+ 
+@@ -639,6 +655,10 @@ ath_regd_init_wiphy(struct ath_regulatory *reg,
+ 	const struct ieee80211_regdomain *regd;
+ 
+ 	wiphy->reg_notifier = reg_notifier;
++
++	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
++		return 0;
++
+ 	wiphy->regulatory_flags |= REGULATORY_STRICT_REG |
+ 				   REGULATORY_CUSTOM_REG;
+ 
+-- 
+2.37.1
+
+
+From 5af780374dc163b749cfe71d876b672370e04d0b Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 13:47:56 +0300
+Subject: [PATCH 2/8] 403-world_regd_fixup
+
+---
+ drivers/net/wireless/ath/regd.c | 32 ++++++++++++++++----------------
+ 1 file changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
+index 0c172f3c0646..877185bc9987 100644
+--- a/drivers/net/wireless/ath/regd.c
++++ b/drivers/net/wireless/ath/regd.c
+@@ -44,7 +44,8 @@ static struct reg_dmn_pair_mapping *ath_get_regpair(int regdmn);
+ 					 NL80211_RRF_NO_OFDM)
+ 
+ /* We allow IBSS on these on a case by case basis by regulatory domain */
+-#define ATH_5GHZ_5150_5350	REG_RULE(5150-10, 5350+10, 80, 0, 30,\
++#define ATH_5GHZ_5150_5350	REG_RULE(5150-10, 5240+10, 80, 0, 30, 0),\
++				REG_RULE(5260-10, 5350+10, 80, 0, 30,\
+ 					 NL80211_RRF_NO_IR)
+ #define ATH_5GHZ_5470_5850	REG_RULE(5470-10, 5850+10, 80, 0, 30,\
+ 					 NL80211_RRF_NO_IR)
+@@ -62,57 +63,56 @@ static struct reg_dmn_pair_mapping *ath_get_regpair(int regdmn);
+ #define ATH_5GHZ_NO_MIDBAND	ATH_5GHZ_5150_5350, \
+ 				ATH_5GHZ_5725_5850
+ 
++#define REGD_RULES(...) \
++	.reg_rules = { __VA_ARGS__ }, \
++	.n_reg_rules = ARRAY_SIZE(((struct ieee80211_reg_rule[]) { __VA_ARGS__ }))
++
+ /* Can be used for:
+  * 0x60, 0x61, 0x62 */
+ static const struct ieee80211_regdomain ath_world_regdom_60_61_62 = {
+-	.n_reg_rules = 5,
+ 	.alpha2 =  "99",
+-	.reg_rules = {
++	REGD_RULES(
+ 		ATH_2GHZ_ALL,
+ 		ATH_5GHZ_ALL,
+-	}
++	)
+ };
+ 
+ /* Can be used by 0x63 and 0x65 */
+ static const struct ieee80211_regdomain ath_world_regdom_63_65 = {
+-	.n_reg_rules = 4,
+ 	.alpha2 =  "99",
+-	.reg_rules = {
++	REGD_RULES(
+ 		ATH_2GHZ_CH01_11,
+ 		ATH_2GHZ_CH12_13,
+ 		ATH_5GHZ_NO_MIDBAND,
+-	}
++	)
+ };
+ 
+ /* Can be used by 0x64 only */
+ static const struct ieee80211_regdomain ath_world_regdom_64 = {
+-	.n_reg_rules = 3,
+ 	.alpha2 =  "99",
+-	.reg_rules = {
++	REGD_RULES(
+ 		ATH_2GHZ_CH01_11,
+ 		ATH_5GHZ_NO_MIDBAND,
+-	}
++	)
+ };
+ 
+ /* Can be used by 0x66 and 0x69 */
+ static const struct ieee80211_regdomain ath_world_regdom_66_69 = {
+-	.n_reg_rules = 3,
+ 	.alpha2 =  "99",
+-	.reg_rules = {
++	REGD_RULES(
+ 		ATH_2GHZ_CH01_11,
+ 		ATH_5GHZ_ALL,
+-	}
++	)
+ };
+ 
+ /* Can be used by 0x67, 0x68, 0x6A and 0x6C */
+ static const struct ieee80211_regdomain ath_world_regdom_67_68_6A_6C = {
+-	.n_reg_rules = 4,
+ 	.alpha2 =  "99",
+-	.reg_rules = {
++	REGD_RULES(
+ 		ATH_2GHZ_CH01_11,
+ 		ATH_2GHZ_CH12_13,
+ 		ATH_5GHZ_ALL,
+-	}
++	)
+ };
+ 
+ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
+-- 
+2.37.1
+
+
+From 0d5bfbfc40d27a0aeae489761573a1529cf3971b Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 13:48:36 +0300
+Subject: [PATCH 3/8] 404-regd_no_assoc_hints
+
+---
+ net/wireless/reg.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/wireless/reg.c b/net/wireless/reg.c
+index fd848609e656..bf6fc2f6b83e 100644
+--- a/net/wireless/reg.c
++++ b/net/wireless/reg.c
+@@ -3256,6 +3256,8 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
+ 	enum environment_cap env = ENVIRON_ANY;
+ 	struct regulatory_request *request = NULL, *lr;
+ 
++	return;
++
+ 	/* IE len must be evenly divisible by 2 */
+ 	if (country_ie_len & 0x01)
+ 		return;
+@@ -3507,6 +3509,7 @@ static bool is_wiphy_all_set_reg_flag(enum ieee80211_regulatory_flags flag)
+ 
+ void regulatory_hint_disconnect(void)
+ {
++	return;
+ 	/* Restore of regulatory settings is not required when wiphy(s)
+ 	 * ignore IE from connected access point but clearance of beacon hints
+ 	 * is required when wiphy(s) supports beacon hints.
+-- 
+2.37.1
+
+
+From 8e54532a1b1f508c167f8a956e2e84147c5440dd Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 13:49:11 +0300
+Subject: [PATCH 4/8] 405-ath_regd_us
+
+---
+ drivers/net/wireless/ath/regd_common.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/net/wireless/ath/regd_common.h b/drivers/net/wireless/ath/regd_common.h
+index c4bd26e65949..364011e6ee2b 100644
+--- a/drivers/net/wireless/ath/regd_common.h
++++ b/drivers/net/wireless/ath/regd_common.h
+@@ -32,6 +32,7 @@ enum EnumRd {
+ 	FCC2_WORLD = 0x21,
+ 	FCC2_ETSIC = 0x22,
+ 	FCC6_WORLD = 0x23,
++	FCC3_FCCA_2 = 0x2A,
+ 	FRANCE_RES = 0x31,
+ 	FCC3_FCCA = 0x3A,
+ 	FCC3_WORLD = 0x3B,
+@@ -172,6 +173,7 @@ static struct reg_dmn_pair_mapping regDomainPairs[] = {
+ 	{FCC2_WORLD, CTL_FCC, CTL_ETSI},
+ 	{FCC2_ETSIC, CTL_FCC, CTL_ETSI},
+ 	{FCC3_FCCA, CTL_FCC, CTL_FCC},
++	{FCC3_FCCA_2, CTL_FCC, CTL_FCC},
+ 	{FCC3_WORLD, CTL_FCC, CTL_ETSI},
+ 	{FCC3_ETSIC, CTL_FCC, CTL_ETSI},
+ 	{FCC4_FCCA, CTL_FCC, CTL_FCC},
+@@ -483,6 +485,7 @@ static struct country_code_to_enum_rd allCountries[] = {
+ 	{CTRY_UAE, NULL1_WORLD, "AE"},
+ 	{CTRY_UNITED_KINGDOM, ETSI1_WORLD, "GB"},
+ 	{CTRY_UNITED_STATES, FCC3_FCCA, "US"},
++	{CTRY_UNITED_STATES, FCC3_FCCA_2, "US"},
+ 	{CTRY_UNITED_STATES2, FCC3_FCCA, "US"},
+ 	{CTRY_UNITED_STATES3, FCC3_FCCA, "US"},
+ 	/* This "PS" is for US public safety actually... to support this we
+-- 
+2.37.1
+
+
+From 543febb22e5e0a766f67ffafca5ab4126e6b998a Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 13:50:30 +0300
+Subject: [PATCH 5/8] 406-ath_relax_default_regd
+
+---
+ drivers/net/wireless/ath/regd.c | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
+index 877185bc9987..db1fa65bb65a 100644
+--- a/drivers/net/wireless/ath/regd.c
++++ b/drivers/net/wireless/ath/regd.c
+@@ -115,6 +115,16 @@ static const struct ieee80211_regdomain ath_world_regdom_67_68_6A_6C = {
+ 	)
+ };
+ 
++static u16 ath_regd_get_eepromRD(struct ath_regulatory *reg)
++{
++	return reg->current_rd & ~WORLDWIDE_ROAMING_FLAG;
++}
++
++static bool is_default_regd(struct ath_regulatory *reg)
++{
++	return ath_regd_get_eepromRD(reg) == CTRY_DEFAULT;
++}
++
+ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
+ {
+ 	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
+@@ -123,6 +133,9 @@ static bool dynamic_country_user_possible(struct ath_regulatory *reg)
+ 	if (IS_ENABLED(CONFIG_ATH_REG_DYNAMIC_USER_CERT_TESTING))
+ 		return true;
+ 
++	if (is_default_regd(reg))
++		return true;
++
+ 	switch (reg->country_code) {
+ 	case CTRY_UNITED_STATES:
+ 	case CTRY_JAPAN1:
+@@ -209,11 +222,6 @@ static inline bool is_wwr_sku(u16 regd)
+ 		(regd == WORLD));
+ }
+ 
+-static u16 ath_regd_get_eepromRD(struct ath_regulatory *reg)
+-{
+-	return reg->current_rd & ~WORLDWIDE_ROAMING_FLAG;
+-}
+-
+ bool ath_is_world_regd(struct ath_regulatory *reg)
+ {
+ 	return is_wwr_sku(ath_regd_get_eepromRD(reg));
+@@ -659,6 +667,9 @@ ath_regd_init_wiphy(struct ath_regulatory *reg,
+ 	if (IS_ENABLED(CONFIG_ATH_USER_REGD))
+ 		return 0;
+ 
++	if (is_default_regd(reg))
++		return 0;
++
+ 	wiphy->regulatory_flags |= REGULATORY_STRICT_REG |
+ 				   REGULATORY_CUSTOM_REG;
+ 
+-- 
+2.37.1
+
+
+From 246cc587d7e1c816e8573352f37135d57018725c Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 14:41:36 +0300
+Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
+
+---
+ drivers/net/wireless/ath/ath10k/core.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/net/wireless/ath/ath10k/core.c b/drivers/net/wireless/ath/ath10k/core.c
+index d0967bb1f387..3375ef54e7ff 100644
+--- a/drivers/net/wireless/ath/ath10k/core.c
++++ b/drivers/net/wireless/ath/ath10k/core.c
+@@ -3206,6 +3206,16 @@ int ath10k_core_register(struct ath10k *ar,
+ 
+ 	queue_work(ar->workqueue, &ar->register_work);
+ 
++	/* OpenWrt requires all PHYs to be initialized to create the
++	 * configuration files during bootup. ath10k violates this
++	 * because it delays the creation of the PHY to a not well defined
++	 * point in the future.
++	 *
++	 * Forcing the work to be done immediately works around this problem
++	 * but may also delay the boot when firmware images cannot be found.
++	 */
++	flush_workqueue(ar->workqueue);
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL(ath10k_core_register);
+-- 
+2.37.1
+
+
+From 4c9c7a526d0d8af9c68291917ba74a216c901fb2 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 14:42:24 +0300
+Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
+
+---
+ drivers/net/wireless/ath/ath10k/htt.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/wireless/ath/ath10k/htt.h b/drivers/net/wireless/ath/ath10k/htt.h
+index 2ee2c655d599..dbc8aef82a65 100644
+--- a/drivers/net/wireless/ath/ath10k/htt.h
++++ b/drivers/net/wireless/ath/ath10k/htt.h
+@@ -2242,7 +2242,7 @@ struct htt_rx_chan_info {
+  * Should be: sizeof(struct htt_host_rx_desc) + max rx MSDU size,
+  * rounded up to a cache line size.
+  */
+-#define HTT_RX_BUF_SIZE 1920
++#define HTT_RX_BUF_SIZE 2048
+ #define HTT_RX_MSDU_SIZE (HTT_RX_BUF_SIZE - (int)sizeof(struct htt_rx_desc))
+ 
+ /* Refill a bunch of RX buffers for each refill round so that FW/HW can handle
+-- 
+2.37.1
+
+
+From a4baa23b8b3af2467f20e8162081c4765f827555 Mon Sep 17 00:00:00 2001
+From: Urja Rannikko <urjaman@gmail.com>
+Date: Thu, 23 Sep 2021 14:43:31 +0300
+Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
+
+---
+ drivers/net/wireless/ath/ath10k/mac.c | 43 +++++++++++++++++++++++++--
+ 1 file changed, 40 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/ath10k/mac.c b/drivers/net/wireless/ath/ath10k/mac.c
+index b61cd275fbda..0c7b99b705d5 100644
+--- a/drivers/net/wireless/ath/ath10k/mac.c
++++ b/drivers/net/wireless/ath/ath10k/mac.c
+@@ -1009,6 +1009,40 @@ static inline int ath10k_vdev_setup_sync(struct ath10k *ar)
+ 	return ar->last_wmi_vdev_start_status;
+ }
+ 
++static u32 ath10k_get_max_antenna_gain(struct ath10k *ar,
++				       u32 ch_max_antenna_gain)
++{
++	u32 max_antenna_gain;
++
++	if (ar->dfs_detector && ar->dfs_detector->region == NL80211_DFS_FCC) {
++		/* FCC allows maximum antenna gain of 6 dBi. 15.247(b)(4):
++		 *
++		 * > (4) The conducted output power limit
++		 * > specified in paragraph (b) of this section
++		 * > is based on the use of antennas
++		 * > with directional gains that do not exceed
++		 * > 6 dBi. Except as shown in paragraph
++		 * > (c) of this section, if transmitting
++		 * > antennas of directional gain greater
++		 * > than 6 dBi are used, the conducted
++		 * > output power from the intentional radiator
++		 * > shall be reduced below the stated
++		 * > values in paragraphs (b)(1), (b)(2),
++		 * > and (b)(3) of this section, as appropriate,
++		 * > by the amount in dB that the
++		 * > directional gain of the antenna exceeds
++		 * > 6 dBi.
++		 *
++		 * https://www.gpo.gov/fdsys/pkg/CFR-2013-title47-vol1/pdf/CFR-2013-title47-vol1-sec15-247.pdf
++		 */
++		max_antenna_gain = 6;
++	} else {
++		max_antenna_gain = 0;
++	}
++
++	return max(ch_max_antenna_gain, max_antenna_gain);
++}
++
+ static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
+ {
+ 	struct cfg80211_chan_def *chandef = NULL;
+@@ -1041,7 +1075,8 @@ static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
+ 	arg.channel.min_power = 0;
+ 	arg.channel.max_power = channel->max_power * 2;
+ 	arg.channel.max_reg_power = channel->max_reg_power * 2;
+-	arg.channel.max_antenna_gain = channel->max_antenna_gain;
++	arg.channel.max_antenna_gain = ath10k_get_max_antenna_gain(ar,
++						channel->max_antenna_gain);
+ 
+ 	reinit_completion(&ar->vdev_setup_done);
+ 	reinit_completion(&ar->vdev_delete_done);
+@@ -1487,7 +1522,8 @@ static int ath10k_vdev_start_restart(struct ath10k_vif *arvif,
+ 	arg.channel.min_power = 0;
+ 	arg.channel.max_power = chandef->chan->max_power * 2;
+ 	arg.channel.max_reg_power = chandef->chan->max_reg_power * 2;
+-	arg.channel.max_antenna_gain = chandef->chan->max_antenna_gain;
++	arg.channel.max_antenna_gain = ath10k_get_max_antenna_gain(ar,
++					chandef->chan->max_antenna_gain);
+ 
+ 	if (arvif->vdev_type == WMI_VDEV_TYPE_AP) {
+ 		arg.ssid = arvif->u.ap.ssid;
+@@ -3258,7 +3294,8 @@ static int ath10k_update_channel_list(struct ath10k *ar)
+ 			ch->min_power = 0;
+ 			ch->max_power = channel->max_power * 2;
+ 			ch->max_reg_power = channel->max_reg_power * 2;
+-			ch->max_antenna_gain = channel->max_antenna_gain;
++			ch->max_antenna_gain = ath10k_get_max_antenna_gain(ar,
++						channel->max_antenna_gain);
+ 			ch->reg_class_id = 0; /* FIXME */
+ 
+ 			/* FIXME: why use only legacy modes, why not any
+-- 
+2.37.1
+
