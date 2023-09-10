@@ -54,7 +54,8 @@ kernel_i586con = {
     "verpolicy": "5.15",
 }
 
-kernels = [kernel_c201ml, kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
+#kernels = [kernel_c201ml, kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
+kernels = [kernel_c201ml, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
 
 url = "https://www.kernel.org/releases.json"
 
@@ -62,9 +63,9 @@ prev2_releases = "old_releases.json"
 prev_releases = "prev_releases.json"
 curr_fn = "releases.json"
 
-emhost = '\x40urja.dev'
+emhost = '\x40tea.urja.dev'
 whoami = f'KBB <kbb{emhost}>'
-toaddr = f'urja{emhost}, urjaman\x40gmail.com'
+toaddr = f'urja{emhost}, urja\x40urja.dev'
 emailproc = ['ssh', 'kbb\x40urja.dev', 'sendmail', '-t']
 
 def vtag4xfer(x):
@@ -174,6 +175,9 @@ def repatch_indir(patchset, newver, verpolicy):
 
     oldtag = subc(["git", "describe", "--tags"], stdout=PIPE).decode().strip()
     (oldset, oldver) = oldtag.split(sep="-", maxsplit=1)
+
+    if '-v' in oldver:
+        oldver, _ = oldver.rsplit(sep="-v", maxsplit=1)
 
     if verpolicy != "mainline":
         newno = versplit(newver)

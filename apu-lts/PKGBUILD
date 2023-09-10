@@ -2,7 +2,7 @@
 # Hacker: Urja ;P
 
 pkgbase=linux-apu
-pkgver=5.10.134
+pkgver=5.10.192
 pkgrel=1
 pkgdesc='LTS Linux (with APU spice)'
 url="https://www.kernel.org/"
@@ -35,8 +35,8 @@ prepare() {
 
   unset GIT_DIR
 
-  # Append (if -rc*) or set ${_xname}-${pkgrel} as extraversion
-  sed -ri "s/^(EXTRAVERSION =) ?(-rc[^-]*|).*/\1 \2apu-${pkgrel}/" Makefile
+  # Append (if -rc*) or set ${pkgrel} as extraversion
+  sed -ri "s/^(EXTRAVERSION =) ?(-rc[^-]*|).*/\1 \2-${pkgrel}/" Makefile
 
   echo "Setting config..."
   cat "${srcdir}/config" > ./.config
@@ -100,7 +100,7 @@ done
 # vim:set ts=8 sts=2 sw=2 et:
 
 sha256sums=('dcdf99e43e98330d925016985bfbc7b83c66d367b714b2de0cbbfcbf83d8ca43'
-            '019b136e496a1d5f6fcba3ee504b0ca2bbc72930f44c72bfc2c7ac582cd7c702'
-            '4a5e67e5e91d930e52c269c75c3d30323007c502e3e6f26fb4d56e1990ce2f2a'
-            '62071ce09f532c76334aa5ac9d499ac678264d2e503396ca094644b83149db93'
+            '15a2f65c5bf4a4b05129ed2825660154a63b2fce8733557032ab2d47518113c5'
+            '21f773868654eaaff636ce297f49d6b83801d968f350f4ceca0b6d3af781c697'
+            '698436db80964a9080de77941dbea38365fdef6c62f2996c6612781b074f6487'
             '082385d0802ab8290564df1f0973ce82cc328bc438bf91abfa5a8df40401e417')
