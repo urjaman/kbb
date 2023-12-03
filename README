@@ -1,8 +1,20 @@
-Don't look here.
-Or I mean, who am i to tell you,
-I'm just a readme...
+Using the built C201 kernels:
+put this in pacman.conf:
 
-If you really want to see (parts of)
-what i hacked together to avoid
-manually updating my kernels, go ahead...
-just don't expect support or help with it.
+[kbbpkgs]
+SigLevel = Optional
+Server = https://urja.dev/kbbpkgs/armv7h/
+
+Do a pacman -Syu
+(a -Sy technically would get the repo, but you need to be up-to-date...)
+
+then pacman -S linux-c201 linux-c201-chromebook
+for the 6.1 one.
+
+Note: the -chromebook packages are untested at this point, because
+i'm running my own old build of u-boot.
+
+Expect no support (sorry), i'm running this only for myself.
+
+(This thing updates a couple of other kernels of mine.
+Don't ask about them.)
