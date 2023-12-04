@@ -418,6 +418,9 @@ def update_and_build():
     os.replace(prev_releases, prev2_releases)
     os.replace(curr_fn, prev_releases)
     successmail(successlist)
+    if successlist:
+        subc(["git", "commit", "-a", "-m", "Automatic update"])
+        subc(["git", "push"])
 
 
 if len(sys.argv) == 1:
