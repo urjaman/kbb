@@ -1,4 +1,4 @@
-From dfe2db5cb2cc4924e3d61fdbadd241aa6e031e3a Mon Sep 17 00:00:00 2001
+From 0d1fe4200dbca21a7cea17eebd0ea3f4e6d6f28f Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Sun, 26 Aug 2018 21:14:30 +0000
 Subject: [PATCH 01/15] dt-bindings: clock: rk3288-cru: Add property to
@@ -27,7 +27,7 @@ index bf3a9ec19241..59be6c44f453 100644
 2.41.0
 
 
-From 49334c50c6a37817bfa0b8fca4339cfa33da3d14 Mon Sep 17 00:00:00 2001
+From 7d848f0c4ed0e320071d5d687f3d22aeac53994c Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 10:30:55 +0000
 Subject: [PATCH 02/15] drivers: clk-rk3288: support for dedicating NPLL to a
@@ -195,7 +195,7 @@ index 7aa45cc70287..18c7071ad017 100644
 2.41.0
 
 
-From 4b16f8fb4af6586b6c1e0a55acd7cb4494c8a790 Mon Sep 17 00:00:00 2001
+From c0572e020869121d43bf848a21f34dfc010c2036 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Wed, 22 Aug 2018 18:36:40 +0000
 Subject: [PATCH 03/15] drm: dw_hdmi-rockchip: better clock selection logic and
@@ -621,7 +621,7 @@ index 8677c8271678..bc6ffebb1fae 100644
 2.41.0
 
 
-From 2b196f87bba4af083b7bf8d576643e8c89bfd8f1 Mon Sep 17 00:00:00 2001
+From 3bbe119737557e8ab5515ad6b65ce4b8c8815d1d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:00:50 +0000
 Subject: [PATCH 04/15] dts: rk3288: support for dedicating npll to a vop
@@ -660,7 +660,7 @@ index 2e6138eeacd1..5800d65874a9 100644
 2.41.0
 
 
-From 8f639f01c391254cb8178cf47e29eae8a45b89fa Mon Sep 17 00:00:00 2001
+From caa7359d0fcd7930bb66f1b0ae284766ab992d0b Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:03:49 +0000
 Subject: [PATCH 05/15] dts: rk3288-veyron-chromebook: dedicate npll to
@@ -753,7 +753,7 @@ index 05112c25176d..4d972bd6741c 100644
 2.41.0
 
 
-From cf45123dba2927873b6cbbc3c07da39bd8de7cf9 Mon Sep 17 00:00:00 2001
+From 2b2f632470a1cd85c66949c9dbcea4352de7cc1b Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Sun, 21 Oct 2018 16:40:15 -0500
 Subject: [PATCH 06/15] Added a second reset when having an issue reading the
@@ -776,7 +776,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 25077a1a3d82..639fd94480cd 100644
+index 206bd5523ab7..fa6bbbcd084f 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
 @@ -998,12 +998,14 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
@@ -811,7 +811,7 @@ index 25077a1a3d82..639fd94480cd 100644
 2.41.0
 
 
-From 974be61404f58a62e9b99190c953f80793b357ab Mon Sep 17 00:00:00 2001
+From f2ccdc03c689dc0398a8626b00e98568e85202a4 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 9 Oct 2018 22:01:07 +0200
 Subject: [PATCH 07/15] block: partitions: efi: Ignore bizarre Chromebook GPT
@@ -964,7 +964,7 @@ index 8cc2b88d0aa8..fcf65ebbaa85 100644
 2.41.0
 
 
-From fb8dedf51b7fa72b24cec58456716b21f75d89f1 Mon Sep 17 00:00:00 2001
+From f30f21a415a9cc4d43d8a8eef5697144d337c1c5 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 30 Oct 2018 22:44:54 +0100
 Subject: [PATCH 08/15] mmc: Added a flag to disable cache flush during reset
@@ -1037,7 +1037,7 @@ index d805f8450719..e88c8247066c 100644
  	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
  	     mmc_can_reset(card)) {
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0c0c9a0fdf57..8e56332746db 100644
+index a4ec7269b629..5d468bc33b21 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -399,6 +399,7 @@ struct mmc_host {
@@ -1052,7 +1052,7 @@ index 0c0c9a0fdf57..8e56332746db 100644
 2.41.0
 
 
-From cd96743f6199f6073b4056e0ade46d018866d81d Mon Sep 17 00:00:00 2001
+From 740b5b0cecf415370a97e775b0d255a41db9c626 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Thu, 1 Nov 2018 21:31:26 +0100
 Subject: [PATCH 09/15] arm: dts: veyron: Added a flag to disable cache flush
@@ -1085,7 +1085,7 @@ index 54a6838d73f5..71d3d0345f08 100644
 2.41.0
 
 
-From 210b69a0141a97ad7a77ecc8afa9de2644652d63 Mon Sep 17 00:00:00 2001
+From 04eaec2ffb25b54cfe8400b28918af66c9c104b0 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 18 Mar 2019 22:40:52 +0000
 Subject: [PATCH 10/15] dwc2 veyron otg mode hack
@@ -1222,7 +1222,7 @@ index 6496bfbd34ed..d2b6761bf703 100644
 2.41.0
 
 
-From 0c86891e659c7addd8395000a76f735936cf4f66 Mon Sep 17 00:00:00 2001
+From 3dc5f69a0625c8a934fb11a2bc8375545b18b41e Mon Sep 17 00:00:00 2001
 From: Hal Emmerich <hal@halemmerich.com>
 Date: Wed, 21 Aug 2019 16:52:41 -0500
 Subject: [PATCH 11/15] Fix ath9k dwc2 init frame overruns
@@ -1265,7 +1265,7 @@ index 24beff610cf2..fdbecdcc292e 100644
 2.41.0
 
 
-From edfc43fb231040ba32c0581a3ba028acdc08505c Mon Sep 17 00:00:00 2001
+From b3cef62fd4cf73083cd92d9a8fb624ec9798afcd Mon Sep 17 00:00:00 2001
 From: barzur <boris@konbu.org>
 Date: Fri, 12 Jul 2019 11:33:32 +0900
 Subject: [PATCH 12/15] usb/dwc2/hcd: channel halt may not be an error
@@ -1336,7 +1336,7 @@ index 08e2792cb732..c30ceb503893 100644
 2.41.0
 
 
-From 603164e2cdcfb6a400bff2ea8345098ec50f64d7 Mon Sep 17 00:00:00 2001
+From 5a10ba5c83abddce885e998e7788677443280dd9 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:03:37 +0000
 Subject: [PATCH 13/15] drm/panel: simple: Extend Innolux N116BGE mode info for
@@ -1383,7 +1383,7 @@ index d9f1675c348e..8a381ccb9c64 100644
 2.41.0
 
 
-From 1d5fe08647419a8062d159b1785f8ceb1c81792f Mon Sep 17 00:00:00 2001
+From 0b9c906866b9419615d2e2f1e99e45c5aed4f798 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:12:33 +0000
 Subject: [PATCH 14/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
@@ -1422,7 +1422,7 @@ index 32c0f10765dd..ea20818202fc 100644
 2.41.0
 
 
-From a342b7f5eaa0e402f05aca61cc20a9b8f4274d26 Mon Sep 17 00:00:00 2001
+From aba1ca318b6649e7f3c20ad3f427cb877e24e013 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 28 Sep 2021 20:23:13 +0300
 Subject: [PATCH 15/15] Revert "clk: divider: Implement and wire up
