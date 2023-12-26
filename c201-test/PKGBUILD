@@ -14,7 +14,7 @@ pkgbase=linux-c201${_xname}
 _srcname=linux
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=6.3.r14.g7d868683df88
+pkgver=6.6.8.r15.g8bbbaf77cd7d
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
@@ -109,7 +109,7 @@ _package() {
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
   # remove build and source links
-  rm "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
+  rm -vf "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
 
   # now we call depmod...
   depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
@@ -159,7 +159,7 @@ for _p in ${pkgname[@]}; do
 done
 
 md5sums=(
-         '9751afcc5d59bf5d34561efbe7fc1fec'
+	 '1e1e498f4f59f2c3b2ddbdd562ff2d07'
          '61c5ff73c136ed07a7aadbf58db3d96a'
          '584777ae88bce2c5659960151b64c7d8'
          'ce6c81ad1ad1f8b333fd6077d47abdaf'
