@@ -11,19 +11,20 @@ buildarch=4
 _xname=-lts
 
 pkgbase=linux-c201${_xname}
-_srcname=linux-5.15
+_srcname=linux-6.1
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=5.15.145
-pkgrel=1
+pkgver=6.1.69
+pkgrel=6
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
 source=(
-	"https://www.kernel.org/pub/linux/kernel/v5.x/${_srcname}.tar.xz"
-        "https://www.kernel.org/pub/linux/kernel/v5.x/patch-${pkgver}.xz"
+	"https://www.kernel.org/pub/linux/kernel/v${pkgver::1}.x/${_srcname}.tar.xz"
+        "https://www.kernel.org/pub/linux/kernel/v${pkgver::1}.x/patch-${pkgver}.xz"
+	# Those are good until 9.x (10.x will fail), fix this then :P
 	'c201.patch'
         'kernel.its'
         'kernel.keyblock'
@@ -52,6 +53,7 @@ prepare() {
 
   # don't run depmod on 'make install'. We'll do this ourselves in packaging
   sed -i '2iexit 0' scripts/depmod.sh
+
 }
 
 build() {
@@ -67,8 +69,6 @@ build() {
   #make xconfig # X-based configuration
   make olddefconfig # using old config from previous kernel version (quiet)
   # ... or manually edit .config
-
-  #make menuconfig
 
   # Copy back our configuration (use with new kernel version)
   cp ./.config ../../config
@@ -164,11 +164,11 @@ for _p in ${pkgname[@]}; do
   }"
 done
 
-sha256sums=('57b2cf6991910e3b67a1b3490022e8a0674b6965c74c12da1e99d138d1991ee8'
-            '4a9192cec15ae9bd68e7a61f30cb3632444ddcdc2208076af86579a7b942edb1'
-            '009eedcd8b6919f918d5f7a9d3a909bfc24400d360e0b9672051ad4b96a35535'
+sha256sums=('2ca1f17051a430f6fed1196e4952717507171acfd97d96577212502703b25deb'
+            '000dfce9a36c58d5763ffb2ce34815686fdb69709119a349cc18ad3588f09c3f'
+            '3140ee24556802eb0be1f8ffec218136c5ea9f2e8dd8b5c346f4d6f49ae02456'
             '017e419a9c82fd0921b1bd48610feb0edd15f9545256a5d3ea7d32f9bb80094f'
             '4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb'
             'bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b'
             'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
-            'dd15e25851294041456b6622f268756f5e3e76e54edcc43d1ba425415236488c')
+            '7054e43db6d3f9470f6fa1fd0a7511a16707ea6b2990ebc547dd59a6c5def027')

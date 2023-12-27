@@ -11,11 +11,11 @@ buildarch=4
 _xname=
 
 pkgbase=linux-c201${_xname}
-_srcname=linux-6.1
+_srcname=linux-6.6
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=6.1.69
-pkgrel=1
+pkgver=6.6.8
+pkgrel=4
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -114,8 +114,8 @@ _package() {
   echo "${_kernver}" |
     install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
 
-  # remove build and source links
-  rm "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
+  # remove build link
+  rm "${pkgdir}"/usr/lib/modules/${_kernver}/build
 
   # now we call depmod...
   depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
@@ -164,11 +164,11 @@ for _p in ${pkgname[@]}; do
   }"
 done
 
-sha256sums=('2ca1f17051a430f6fed1196e4952717507171acfd97d96577212502703b25deb'
-            '000dfce9a36c58d5763ffb2ce34815686fdb69709119a349cc18ad3588f09c3f'
-            '7080673ee88863e05042a1bb8c15ca2e4696c8c90bdbbf8cdd1fcc85fc9a6741'
-            '017e419a9c82fd0921b1bd48610feb0edd15f9545256a5d3ea7d32f9bb80094f'
+sha256sums=('d926a06c63dd8ac7df3f86ee1ffc2ce2a3b81a2d168484e76b5b389aba8e56d0'
+            '583dcf8a18344cf9eb68916b3082274a0a0531d59d732f9f4df7f870af33d72a'
+            '39803b44751a12630f4cec8b4e43ad23107360e7fee92d949b9cc3f4c5da5b50'
+            '9e6979121d1f3067561d1fe3e1914a36ac0e06197293a94f09d2405d36698f4a'
             '4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb'
             'bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b'
             'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
-            '51b713da10718de753cc2d1063d9160babe82cafa1bdbb1cadb3a0f694a3d9c6')
+            '10080ba77dc7608fe4ca2d143f73072e680cc4d08ed975fad9969cda8047648f')
