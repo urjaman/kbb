@@ -19,7 +19,7 @@ from subprocess import DEVNULL, PIPE, STDOUT
 from email.message import EmailMessage
 
 
-kernel_c201ml = {
+kernel_c201_ml = {
     "dir": "linux-kbb-c201",
     "patchset": "c201",
     "build": "./makepkg-c201-test.sh",
@@ -30,14 +30,14 @@ kernel_c201_stable = {
     "dir": "linux-kbb-c201-stable",
     "patchset": "c201",
     "build": "./makepkg-c201-stable.sh",
-    "verpolicy": "6.1",
+    "verpolicy": "6.6",
 }
 
 kernel_c201_lts = {
     "dir": "linux-kbb-c201-lts",
     "patchset": "c201",
     "build": "./makepkg-c201-lts.sh",
-    "verpolicy": "5.15",
+    "verpolicy": "6.1",
 }
 
 kernel_apu_lts = {
@@ -54,8 +54,7 @@ kernel_i586con = {
     "verpolicy": "5.15",
 }
 
-kernels = [kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
-#kernels = [kernel_c201ml, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
+kernels = [kernel_c201_ml, kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
 
 url = "https://www.kernel.org/releases.json"
 
