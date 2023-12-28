@@ -9,7 +9,7 @@ Do a pacman -Syu
 (a -Sy technically would get the repo, but you need to be up-to-date...)
 
 then pacman -S linux-c201 linux-c201-chromebook
-for the 6.1 one.
+for the 6.6 one.
 
 Note: the -chromebook packages are untested at this point, because
 i'm running my own old build of u-boot.
