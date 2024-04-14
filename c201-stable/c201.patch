@@ -1,4 +1,4 @@
-From c6fcf9b15f1301ab5f26b8c8439e5676114d628c Mon Sep 17 00:00:00 2001
+From 15b258538b8d536e8942d4a5b46fc26b8244f326 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 10:30:55 +0000
 Subject: [PATCH 01/15] drivers: clk-rk3288: support for dedicating NPLL to a
@@ -166,7 +166,7 @@ index 758ebaf2236b..7ee324e4186f 100644
 2.44.0
 
 
-From 914b0aa51fe6f2516937198428e68cb605693549 Mon Sep 17 00:00:00 2001
+From 53a7aa12332fdc9663e7e8a03a85a86e9c0c6f8a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Wed, 22 Aug 2018 18:36:40 +0000
 Subject: [PATCH 02/15] drm: dw_hdmi-rockchip: better clock selection logic and
@@ -617,7 +617,7 @@ index 341550199111..4dd10e1324a4 100644
 2.44.0
 
 
-From 8b336921cf514ecdbbddec2ce319d1d87329ea29 Mon Sep 17 00:00:00 2001
+From 82140b46e25d3a1d3fbd03c742a721e35638f011 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:00:50 +0000
 Subject: [PATCH 03/15] dts: rk3288: support for dedicating npll to a vop
@@ -632,7 +632,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288.dtsi b/arch/arm/boot/dts/rockchip/rk3288.dtsi
-index cb9cdaddffd4..bebaf27e80e7 100644
+index 8593a8359937..1cfa4eda5abf 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 @@ -867,12 +867,14 @@
@@ -656,7 +656,7 @@ index cb9cdaddffd4..bebaf27e80e7 100644
 2.44.0
 
 
-From 4b127819aef991dd3ab22805b486ec82309cc547 Mon Sep 17 00:00:00 2001
+From 710833f16faf5204530dff1361b916354fdf35c2 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:03:49 +0000
 Subject: [PATCH 04/15] dts: rk3288-veyron-chromebook: dedicate npll to
@@ -749,7 +749,7 @@ index 092316be67f7..e4d5c0240657 100644
 2.44.0
 
 
-From aed13e8d4253179fb2939453f76908bd0749a875 Mon Sep 17 00:00:00 2001
+From 2b541d0e12698a3ebf6cc02b38a34753e96a8159 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Sun, 21 Oct 2018 16:40:15 -0500
 Subject: [PATCH 05/15] Added a second reset when having an issue reading the
@@ -802,7 +802,7 @@ index 3564a0f63c9c..fbfc5c628f14 100644
 2.44.0
 
 
-From 5032ba298b25ac252b69f74d9370e9c359c3fef3 Mon Sep 17 00:00:00 2001
+From 0a067537d705b2a1efc038ffabe0b1b8d0fe8c31 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 9 Oct 2018 22:01:07 +0200
 Subject: [PATCH 06/15] block: partitions: efi: Ignore bizarre Chromebook GPT
@@ -955,7 +955,7 @@ index 84b9f36b9e47..09726227e891 100644
 2.44.0
 
 
-From aa98290a671e875f730619178509824ad65d314a Mon Sep 17 00:00:00 2001
+From 6d2f7b74f2bec735e31d3e390b6c76b460444465 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 30 Oct 2018 22:44:54 +0100
 Subject: [PATCH 07/15] mmc: Added a flag to disable cache flush during reset
@@ -1043,7 +1043,7 @@ index 62a6847a3b6f..d80cc06fa2c6 100644
 2.44.0
 
 
-From bd619f4f3090d75208e45524a703c052c5dab29b Mon Sep 17 00:00:00 2001
+From df4a42b48c805c7e82ef9fac9af610c5c31c7c95 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Thu, 1 Nov 2018 21:31:26 +0100
 Subject: [PATCH 08/15] arm: dts: veyron: Added a flag to disable cache flush
@@ -1076,7 +1076,7 @@ index d838bf0d5d9a..7aeb70e9b828 100644
 2.44.0
 
 
-From b92974b39fba7d8353f5a19780958e6066045b4f Mon Sep 17 00:00:00 2001
+From f872c6c45542b22da70b638f4776fd627410817e Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 18 Mar 2019 22:40:52 +0000
 Subject: [PATCH 09/15] dwc2 veyron otg mode hack
@@ -1213,7 +1213,7 @@ index 7b84416dfc2b..5e6db6bccc2a 100644
 2.44.0
 
 
-From c1c78f563706c240ede312ff121fb1a4351c9e7f Mon Sep 17 00:00:00 2001
+From 4c0465c26e60591f301059e5f6b95054edbd6175 Mon Sep 17 00:00:00 2001
 From: Hal Emmerich <hal@halemmerich.com>
 Date: Wed, 21 Aug 2019 16:52:41 -0500
 Subject: [PATCH 10/15] Fix ath9k dwc2 init frame overruns
@@ -1256,7 +1256,7 @@ index 0d4495c6b9f7..3444cfd35840 100644
 2.44.0
 
 
-From eb25f83e0a7f5d542e3d0cc8c6bc616be64148a2 Mon Sep 17 00:00:00 2001
+From dc6f707869eb407160fcfb81f4735fc780785d2f Mon Sep 17 00:00:00 2001
 From: barzur <boris@konbu.org>
 Date: Fri, 12 Jul 2019 11:33:32 +0900
 Subject: [PATCH 11/15] usb/dwc2/hcd: channel halt may not be an error
@@ -1327,7 +1327,7 @@ index 5c7538d498dd..96dc5d8115d2 100644
 2.44.0
 
 
-From 93e0f689debb8a4a8481c920bdb7cf37b65e5a49 Mon Sep 17 00:00:00 2001
+From 85de52209ab124c2b76693a259706eb8528846b2 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:03:37 +0000
 Subject: [PATCH 12/15] drm/panel: edp: Extend Innolux N116BGE mode info for
@@ -1374,7 +1374,7 @@ index 70feee787611..ade64a1987fc 100644
 2.44.0
 
 
-From b42f236c66e6716b1d248ac0733a767570e4643b Mon Sep 17 00:00:00 2001
+From c1471020f9917552601bd15f0153f9e20d0b7a2d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:12:33 +0000
 Subject: [PATCH 13/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
@@ -1413,7 +1413,7 @@ index 32c0f10765dd..ea20818202fc 100644
 2.44.0
 
 
-From 7d8d11f15940b8171ac19cfbc0a58fd55e87fb36 Mon Sep 17 00:00:00 2001
+From d60e65e708f607c0d7b9708f095ad1eb61824815 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 28 Sep 2021 20:23:13 +0300
 Subject: [PATCH 14/15] Revert "clk: divider: Implement and wire up
@@ -1479,7 +1479,7 @@ index a2c2b5203b0a..9a63a0447d6f 100644
 2.44.0
 
 
-From 5b83e4e2f62273e536ea8b859c4c855af604917b Mon Sep 17 00:00:00 2001
+From 9b287f1442adfa42cfaaa0aaff1c75751ac40a57 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 25 Dec 2023 18:06:10 +0200
 Subject: [PATCH 15/15] dts: veyron: bluetooth: disable dma on uart0
@@ -1491,7 +1491,7 @@ https://codeberg.org/petms/linux-veyron-patches-and-apkbuild
  1 file changed, 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288.dtsi b/arch/arm/boot/dts/rockchip/rk3288.dtsi
-index bebaf27e80e7..b5d117d382f9 100644
+index 1cfa4eda5abf..bba671f0de4f 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 @@ -378,8 +378,6 @@
