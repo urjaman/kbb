@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 6.9.0-rc5-test-1 Kernel Configuration
+# Linux/arm 6.9.0-rc6-test-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-unknown-linux-gnueabihf-gcc (crosstool-NG 1.25.0) 11.2.0"
 CONFIG_CC_IS_GCC=y
@@ -600,6 +600,7 @@ CONFIG_ARCH_HIBERNATION_POSSIBLE=y
 # end of Power management options
 
 CONFIG_AS_VFP_VMRS_FPINST=y
+CONFIG_CPU_MITIGATIONS=y
 
 #
 # General architecture-dependent options
@@ -5015,6 +5016,7 @@ CONFIG_FAT_DEFAULT_IOCHARSET="ascii"
 CONFIG_FAT_DEFAULT_UTF8=y
 # CONFIG_EXFAT_FS is not set
 # CONFIG_NTFS3_FS is not set
+# CONFIG_NTFS_FS is not set
 # end of DOS/FAT/EXFAT/NT Filesystems
 
 #
