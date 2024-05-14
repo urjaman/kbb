@@ -15,7 +15,7 @@ _srcname=linux-6.6
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
 pkgver=6.6.30
-pkgrel=1
+pkgrel=4
 arch=('armv7h')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -171,4 +171,4 @@ sha256sums=('d926a06c63dd8ac7df3f86ee1ffc2ce2a3b81a2d168484e76b5b389aba8e56d0'
             '4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb'
             'bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b'
             'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
-            'ea27c68bc564fe52ccafb7dea9b7b042a6d4daa4ce8c3b49170487cc76c158c9')
+            'b3fe9d9d0d98e2828026907ef61a014126568886271870b935b4f470296170f7')
