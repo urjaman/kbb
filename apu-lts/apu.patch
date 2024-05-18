@@ -1,4 +1,4 @@
-From 95553ffaf765689619dca0ed367ffe2f5409c064 Mon Sep 17 00:00:00 2001
+From 0e3ef2218a66025667fc7deb7292e76301e719c8 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -99,7 +99,7 @@ index 20f4f8ea9f89..0c172f3c0646 100644
 2.44.0
 
 
-From cc8798f4c87a854c225d851750e9f434e024cad7 Mon Sep 17 00:00:00 2001
+From 9e4ce5d258b7effe3d1864e70c0e69a0834d5cf6 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -198,7 +198,7 @@ index 0c172f3c0646..877185bc9987 100644
 2.44.0
 
 
-From 4a02bdffa167976f0fd50be114e3b966075478b0 Mon Sep 17 00:00:00 2001
+From 7a48d8627ac395005bb03b2046c4d31103e7532a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -232,7 +232,7 @@ index 90297264d8ae..9a2bc5c9f14d 100644
 2.44.0
 
 
-From 78f181c625087b891d34f64462792a550608f8fd Mon Sep 17 00:00:00 2001
+From 0dc99ce633dd077c371bc4829555ec3acc9aafc6 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -273,7 +273,7 @@ index c4bd26e65949..364011e6ee2b 100644
 2.44.0
 
 
-From afc56b6c5030203966815ebe3176837bb62ce845 Mon Sep 17 00:00:00 2001
+From d0439b281fa4884ec0cc90cd76a3a70057095e62 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -339,7 +339,7 @@ index 877185bc9987..db1fa65bb65a 100644
 2.44.0
 
 
-From 6ec8fe658327fe35a555bc135826f96aa056b752 Mon Sep 17 00:00:00 2001
+From 5733f9c7640709509c4af6ce602bbb2181229350 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -373,7 +373,7 @@ index 57ac80997319..1786f18f0030 100644
 2.44.0
 
 
-From 5fff0dbbf5fdb5014af8efe9e7f30d8fe257bf47 Mon Sep 17 00:00:00 2001
+From 68c3ec2cec32edb479edb4698fbe3f5eecd745a2 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -399,7 +399,7 @@ index 2ee2c655d599..dbc8aef82a65 100644
 2.44.0
 
 
-From 6078cfd4c756cf29cfd5001a84a784dcc94475ee Mon Sep 17 00:00:00 2001
+From fbf0e8addbe05c439f69f17635230faf76a43888 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
