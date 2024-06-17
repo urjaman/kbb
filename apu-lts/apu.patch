@@ -1,4 +1,4 @@
-From 2916b0af066ca910919365e53c00f92cc8eeafdf Mon Sep 17 00:00:00 2001
+From 98ab922e6c98f77d140d106eed7b1f1baeb20bef Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -99,7 +99,7 @@ index 20f4f8ea9f89..0c172f3c0646 100644
 2.44.0
 
 
-From a97ab16d12f17e18f44314b5c79e950769523cb2 Mon Sep 17 00:00:00 2001
+From a2bbd731bef916b16bf200b9b5270fb7ff108917 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -198,7 +198,7 @@ index 0c172f3c0646..877185bc9987 100644
 2.44.0
 
 
-From 3df387c82ce1b2e0ae05fc8857ec8f3e02d9f139 Mon Sep 17 00:00:00 2001
+From 499dddce1fc27491701fcf0d6aa38241a6f7f335 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -232,7 +232,7 @@ index 90297264d8ae..9a2bc5c9f14d 100644
 2.44.0
 
 
-From 0396b8161b78fb9abc240671802252d193639e6b Mon Sep 17 00:00:00 2001
+From dce7136315fcc311cd4225124fb955aeaf46870d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -273,7 +273,7 @@ index c4bd26e65949..364011e6ee2b 100644
 2.44.0
 
 
-From b9e80f98a6baddb6981e0180dd80f8daf715af0f Mon Sep 17 00:00:00 2001
+From b5b6b7488aae6172f37afe6886ed81df331f3478 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -339,7 +339,7 @@ index 877185bc9987..db1fa65bb65a 100644
 2.44.0
 
 
-From ceaebf9939c1000ddf7b1bece24e262fa4500e46 Mon Sep 17 00:00:00 2001
+From 669ff53ac129983c49cd93276c214c2eded2ca1c Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -349,10 +349,10 @@ Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/net/wireless/ath/ath10k/core.c b/drivers/net/wireless/ath/ath10k/core.c
-index 57ac80997319..1786f18f0030 100644
+index d03a36c45f9f..47926c940fa7 100644
 --- a/drivers/net/wireless/ath/ath10k/core.c
 +++ b/drivers/net/wireless/ath/ath10k/core.c
-@@ -3206,6 +3206,16 @@ int ath10k_core_register(struct ath10k *ar,
+@@ -3209,6 +3209,16 @@ int ath10k_core_register(struct ath10k *ar,
  
  	queue_work(ar->workqueue, &ar->register_work);
  
@@ -373,7 +373,7 @@ index 57ac80997319..1786f18f0030 100644
 2.44.0
 
 
-From 2837ecfdabb64562c4237e12d5adb1f279842572 Mon Sep 17 00:00:00 2001
+From 7bfd5d646cca25a6b9171ef16cd4ae7d13f061aa Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -399,7 +399,7 @@ index 2ee2c655d599..dbc8aef82a65 100644
 2.44.0
 
 
-From 9f862116957e3bc15c602edf42ac49c7c4a7283c Mon Sep 17 00:00:00 2001
+From 2c4aa377c457fb63ab687165850e323289b1d744 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
