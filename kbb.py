@@ -54,7 +54,7 @@ kernel_i586con = {
     "verpolicy": "5.15",
 }
 
-kernels = [kernel_c201_ml, kernel_c201_stable, kernel_c201_lts, kernel_apu_lts, kernel_i586con]
+kernels = [kernel_c201_ml, kernel_c201_stable, kernel_apu_lts, kernel_i586con]
 
 url = "https://www.kernel.org/releases.json"
 

@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 6.6.41-1 Kernel Configuration
+# Linux/arm 6.6.42-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-unknown-linux-gnueabihf-gcc (crosstool-NG 1.25.0) 11.2.0"
 CONFIG_CC_IS_GCC=y
@@ -5703,7 +5703,6 @@ CONFIG_CMA_ALIGNMENT=8
 # CONFIG_DMA_API_DEBUG is not set
 # CONFIG_DMA_MAP_BENCHMARK is not set
 CONFIG_SGL_ALLOC=y
-# CONFIG_FORCE_NR_CPUS is not set
 CONFIG_CPU_RMAP=y
 CONFIG_DQL=y
 CONFIG_NLATTR=y
