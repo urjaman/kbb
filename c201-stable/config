@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 6.6.56-1 Kernel Configuration
+# Linux/arm 6.6.57-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-unknown-linux-gnueabihf-gcc (crosstool-NG 1.25.0) 11.2.0"
 CONFIG_CC_IS_GCC=y
@@ -4203,6 +4203,7 @@ CONFIG_HID_GENERIC=y
 # CONFIG_HID_ZYDACRON is not set
 # CONFIG_HID_SENSOR_HUB is not set
 # CONFIG_HID_ALPS is not set
+# CONFIG_HID_MCP2200 is not set
 # CONFIG_HID_MCP2221 is not set
 # end of Special HID drivers
 
