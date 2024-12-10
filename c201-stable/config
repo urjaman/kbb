@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 6.6.63-1 Kernel Configuration
+# Linux/arm 6.6.64-1 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="arm-unknown-linux-gnueabihf-gcc (crosstool-NG 1.25.0) 11.2.0"
 CONFIG_CC_IS_GCC=y
@@ -4835,6 +4835,7 @@ CONFIG_ARM_ARCH_TIMER=y
 CONFIG_ARM_ARCH_TIMER_EVTSTREAM=y
 CONFIG_ARM_GLOBAL_TIMER=y
 CONFIG_ARM_GT_INITIAL_PRESCALER_VAL=1
+# CONFIG_ARM_TIMER_SP804 is not set
 CONFIG_CLKSRC_ARM_GLOBAL_TIMER_SCHED_CLOCK=y
 # CONFIG_MICROCHIP_PIT64B is not set
 # end of Clock Source drivers
