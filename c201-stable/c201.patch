@@ -1,4 +1,4 @@
-From 133f43f4fafd867f9d4a4338231f6443cae24415 Mon Sep 17 00:00:00 2001
+From ac2ec125c641162b84557bae4c42500111ab770e Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 10:30:55 +0000
 Subject: [PATCH 01/15] drivers: clk-rk3288: support for dedicating NPLL to a
@@ -166,7 +166,7 @@ index 758ebaf2236b..7ee324e4186f 100644
 2.44.0
 
 
-From 20a9cf75416e743fe94e1aeefe8e64bcd28d1245 Mon Sep 17 00:00:00 2001
+From 641a7c0a0d8e5d4b30df1e370d18ff16b93d9d04 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Wed, 22 Aug 2018 18:36:40 +0000
 Subject: [PATCH 02/15] drm: dw_hdmi-rockchip: better clock selection logic and
@@ -199,10 +199,10 @@ Signed-off-by: Maya Matuszczyk <maccraft123mc@gmail.com>
  1 file changed, 166 insertions(+), 113 deletions(-)
 
 diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
-index 89bc86d62014..9012d0eed0bd 100644
+index aae48e906af1..81f8a82aa5d4 100644
 --- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
 +++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
-@@ -81,8 +81,13 @@ struct rockchip_hdmi {
+@@ -80,8 +80,13 @@ struct rockchip_hdmi {
  	struct regulator *avdd_0v9;
  	struct regulator *avdd_1v8;
  	struct phy *phy;
@@ -216,7 +216,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  static struct rockchip_hdmi *to_rockchip_hdmi(struct drm_encoder *encoder)
  {
  	struct rockchip_encoder *rkencoder = to_rockchip_encoder(encoder);
-@@ -90,126 +95,132 @@ static struct rockchip_hdmi *to_rockchip_hdmi(struct drm_encoder *encoder)
+@@ -89,126 +94,132 @@ static struct rockchip_hdmi *to_rockchip_hdmi(struct drm_encoder *encoder)
  	return container_of(rkencoder, struct rockchip_hdmi, encoder);
  }
  
@@ -434,7 +434,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  
  	hdmi->regmap = syscon_regmap_lookup_by_phandle(np, "rockchip,grf");
  	if (IS_ERR(hdmi->regmap)) {
-@@ -246,39 +257,51 @@ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
+@@ -245,39 +256,51 @@ static int rockchip_hdmi_parse_dt(struct rockchip_hdmi *hdmi)
  	if (IS_ERR(hdmi->avdd_1v8))
  		return PTR_ERR(hdmi->avdd_1v8);
  
@@ -508,7 +508,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  			return MODE_OK;
  	}
  
-@@ -294,7 +317,39 @@ dw_hdmi_rockchip_encoder_mode_fixup(struct drm_encoder *encoder,
+@@ -293,7 +316,39 @@ dw_hdmi_rockchip_encoder_mode_fixup(struct drm_encoder *encoder,
  				    const struct drm_display_mode *mode,
  				    struct drm_display_mode *adj_mode)
  {
@@ -549,7 +549,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  }
  
  static void dw_hdmi_rockchip_encoder_mode_set(struct drm_encoder *encoder,
-@@ -350,6 +405,7 @@ dw_hdmi_rockchip_encoder_atomic_check(struct drm_encoder *encoder,
+@@ -349,6 +404,7 @@ dw_hdmi_rockchip_encoder_atomic_check(struct drm_encoder *encoder,
  }
  
  static const struct drm_encoder_helper_funcs dw_hdmi_rockchip_encoder_helper_funcs = {
@@ -557,7 +557,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mode_fixup = dw_hdmi_rockchip_encoder_mode_fixup,
  	.mode_set   = dw_hdmi_rockchip_encoder_mode_set,
  	.enable     = dw_hdmi_rockchip_encoder_enable,
-@@ -452,7 +508,6 @@ static struct rockchip_hdmi_chip_data rk3228_chip_data = {
+@@ -451,7 +507,6 @@ static struct rockchip_hdmi_chip_data rk3228_chip_data = {
  };
  
  static const struct dw_hdmi_plat_data rk3228_hdmi_drv_data = {
@@ -565,7 +565,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mpll_cfg = rockchip_mpll_cfg,
  	.cur_ctr = rockchip_cur_ctr,
  	.phy_config = rockchip_phy_config,
-@@ -469,7 +524,6 @@ static struct rockchip_hdmi_chip_data rk3288_chip_data = {
+@@ -468,7 +523,6 @@ static struct rockchip_hdmi_chip_data rk3288_chip_data = {
  };
  
  static const struct dw_hdmi_plat_data rk3288_hdmi_drv_data = {
@@ -573,7 +573,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mpll_cfg   = rockchip_mpll_cfg,
  	.cur_ctr    = rockchip_cur_ctr,
  	.phy_config = rockchip_phy_config,
-@@ -489,7 +543,6 @@ static struct rockchip_hdmi_chip_data rk3328_chip_data = {
+@@ -488,7 +542,6 @@ static struct rockchip_hdmi_chip_data rk3328_chip_data = {
  };
  
  static const struct dw_hdmi_plat_data rk3328_hdmi_drv_data = {
@@ -581,7 +581,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mpll_cfg = rockchip_mpll_cfg,
  	.cur_ctr = rockchip_cur_ctr,
  	.phy_config = rockchip_phy_config,
-@@ -507,7 +560,6 @@ static struct rockchip_hdmi_chip_data rk3399_chip_data = {
+@@ -506,7 +559,6 @@ static struct rockchip_hdmi_chip_data rk3399_chip_data = {
  };
  
  static const struct dw_hdmi_plat_data rk3399_hdmi_drv_data = {
@@ -589,7 +589,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mpll_cfg   = rockchip_mpll_cfg,
  	.cur_ctr    = rockchip_cur_ctr,
  	.phy_config = rockchip_phy_config,
-@@ -520,7 +572,6 @@ static struct rockchip_hdmi_chip_data rk3568_chip_data = {
+@@ -519,7 +571,6 @@ static struct rockchip_hdmi_chip_data rk3568_chip_data = {
  };
  
  static const struct dw_hdmi_plat_data rk3568_hdmi_drv_data = {
@@ -597,7 +597,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	.mpll_cfg   = rockchip_mpll_cfg,
  	.cur_ctr    = rockchip_cur_ctr,
  	.phy_config = rockchip_phy_config,
-@@ -653,6 +704,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+@@ -652,6 +703,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
  	return 0;
  
  err_bind:
@@ -605,7 +605,7 @@ index 89bc86d62014..9012d0eed0bd 100644
  	drm_encoder_cleanup(encoder);
  	clk_disable_unprepare(hdmi->ref_clk);
  err_clk:
-@@ -668,6 +720,7 @@ static void dw_hdmi_rockchip_unbind(struct device *dev, struct device *master,
+@@ -667,6 +719,7 @@ static void dw_hdmi_rockchip_unbind(struct device *dev, struct device *master,
  {
  	struct rockchip_hdmi *hdmi = dev_get_drvdata(dev);
  
@@ -617,7 +617,7 @@ index 89bc86d62014..9012d0eed0bd 100644
 2.44.0
 
 
-From c9fa32ab3038568da444ff9a07e37820fba560f9 Mon Sep 17 00:00:00 2001
+From a57f254c6a90f2b97827e39a636611c3bd3f8fe8 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:00:50 +0000
 Subject: [PATCH 03/15] dts: rk3288: support for dedicating npll to a vop
@@ -656,7 +656,7 @@ index 8593a8359937..1cfa4eda5abf 100644
 2.44.0
 
 
-From 77640fe8ebf19b40f8341562f41a16f0e7ac8682 Mon Sep 17 00:00:00 2001
+From 9a3f738e7b2a327aad5e54951dbd8731a6187406 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:03:49 +0000
 Subject: [PATCH 04/15] dts: rk3288-veyron-chromebook: dedicate npll to
@@ -749,7 +749,7 @@ index 092316be67f7..e4d5c0240657 100644
 2.44.0
 
 
-From fe8c8c23330e668c461338b6c2ada509907ede5b Mon Sep 17 00:00:00 2001
+From 85ac12a799719d1c46765ea7751a04a73c6c0e47 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Sun, 21 Oct 2018 16:40:15 -0500
 Subject: [PATCH 05/15] Added a second reset when having an issue reading the
@@ -802,7 +802,7 @@ index 3564a0f63c9c..fbfc5c628f14 100644
 2.44.0
 
 
-From 1ec78e1d139165975baed6c46e22f01f58f77b54 Mon Sep 17 00:00:00 2001
+From 4fc7bcc5f214b71e76fffed0fe83903ca56c8514 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 9 Oct 2018 22:01:07 +0200
 Subject: [PATCH 06/15] block: partitions: efi: Ignore bizarre Chromebook GPT
@@ -955,7 +955,7 @@ index 84b9f36b9e47..09726227e891 100644
 2.44.0
 
 
-From b9dbfe8008e6fe73defd1cd730139ab8ee33053f Mon Sep 17 00:00:00 2001
+From c4af9875db000d40e9690cba8f29282789246a64 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 30 Oct 2018 22:44:54 +0100
 Subject: [PATCH 07/15] mmc: Added a flag to disable cache flush during reset
@@ -1043,7 +1043,7 @@ index 62a6847a3b6f..d80cc06fa2c6 100644
 2.44.0
 
 
-From eef612088582562550459d88ee94352fa1a00583 Mon Sep 17 00:00:00 2001
+From 8d50bf7513fd9feb763c131a0c6aa4d39c8f43f7 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Thu, 1 Nov 2018 21:31:26 +0100
 Subject: [PATCH 08/15] arm: dts: veyron: Added a flag to disable cache flush
@@ -1076,7 +1076,7 @@ index d838bf0d5d9a..7aeb70e9b828 100644
 2.44.0
 
 
-From 57170a6399c15a62c1bc94bfd1249ae738a33fcd Mon Sep 17 00:00:00 2001
+From 1b9f9762e48f07abc93361c9a5143ef2801d72dc Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 18 Mar 2019 22:40:52 +0000
 Subject: [PATCH 09/15] dwc2 veyron otg mode hack
@@ -1213,7 +1213,7 @@ index c1b7209b9483..6710c401d9a6 100644
 2.44.0
 
 
-From caf0b3b777c3f042ddb860e6174f43dd2c38e10d Mon Sep 17 00:00:00 2001
+From 7c0905c1d033a4634c3254cb653eaa4bea6f6dd8 Mon Sep 17 00:00:00 2001
 From: Hal Emmerich <hal@halemmerich.com>
 Date: Wed, 21 Aug 2019 16:52:41 -0500
 Subject: [PATCH 10/15] Fix ath9k dwc2 init frame overruns
@@ -1256,7 +1256,7 @@ index 0d4495c6b9f7..3444cfd35840 100644
 2.44.0
 
 
-From ef134e544dd9b33ee20d7af902a07e26b5dc263c Mon Sep 17 00:00:00 2001
+From bccbbe2a097bfa89abad9931bb488d4aac536087 Mon Sep 17 00:00:00 2001
 From: barzur <boris@konbu.org>
 Date: Fri, 12 Jul 2019 11:33:32 +0900
 Subject: [PATCH 11/15] usb/dwc2/hcd: channel halt may not be an error
@@ -1327,7 +1327,7 @@ index 5c7538d498dd..96dc5d8115d2 100644
 2.44.0
 
 
-From 0fea1328a51c3a5a37728ec1cd9a20f9be83782c Mon Sep 17 00:00:00 2001
+From 5e5f6fd91118c75b76715885fa3d7d211a77057d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:03:37 +0000
 Subject: [PATCH 12/15] drm/panel: edp: Extend Innolux N116BGE mode info for
@@ -1374,7 +1374,7 @@ index 94fe2f3836a9..9a9e19fd1fb3 100644
 2.44.0
 
 
-From f1dfa2eab9fac8f87f53ccd24e899c0bec053728 Mon Sep 17 00:00:00 2001
+From 3d5e40b8aafef4e1fa5d6b6b4d244f29bbbfc6c1 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:12:33 +0000
 Subject: [PATCH 13/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
@@ -1413,7 +1413,7 @@ index 32c0f10765dd..ea20818202fc 100644
 2.44.0
 
 
-From 01880eacec977178cb4c8b742a42fa7c3aaf29a0 Mon Sep 17 00:00:00 2001
+From c13a32908571a420ee6fed723310d30beb5da51a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 28 Sep 2021 20:23:13 +0300
 Subject: [PATCH 14/15] Revert "clk: divider: Implement and wire up
@@ -1479,7 +1479,7 @@ index a2c2b5203b0a..9a63a0447d6f 100644
 2.44.0
 
 
-From 7fb63a50789cb70db923128428543f35417631bd Mon Sep 17 00:00:00 2001
+From 9a4b33a2225f661c6c882f8a1b2dc191b640c6ba Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 25 Dec 2023 18:06:10 +0200
 Subject: [PATCH 15/15] dts: veyron: bluetooth: disable dma on uart0
