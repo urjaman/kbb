@@ -1,4 +1,4 @@
-From 4d2e72c908c167120b4af0d403ee977adc02226f Mon Sep 17 00:00:00 2001
+From 3214e0e24aaf4cd38dabb2f3d2dc9abdea0d0346 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -96,10 +96,10 @@ index 20f4f8ea9f89..0c172f3c0646 100644
  				   REGULATORY_CUSTOM_REG;
  
 -- 
-2.44.0
+2.48.1
 
 
-From d23b32d7e5b2e244b64a9b214a776aaae6ccef71 Mon Sep 17 00:00:00 2001
+From d5767a8aa5fb8fd1622070dc91716cfcc784513d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -195,10 +195,10 @@ index 0c172f3c0646..877185bc9987 100644
  
  static bool dynamic_country_user_possible(struct ath_regulatory *reg)
 -- 
-2.44.0
+2.48.1
 
 
-From 2e39a06fd46b668c8644cb4063fcf34009b9834c Mon Sep 17 00:00:00 2001
+From f6d6f7ef53078b9699a08cf15fb73cf33115fa78 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -208,10 +208,10 @@ Subject: [PATCH 3/8] 404-regd_no_assoc_hints
  1 file changed, 3 insertions(+)
 
 diff --git a/net/wireless/reg.c b/net/wireless/reg.c
-index 90297264d8ae..9a2bc5c9f14d 100644
+index 6ab5d8971d10..f08fcab897d9 100644
 --- a/net/wireless/reg.c
 +++ b/net/wireless/reg.c
-@@ -3262,6 +3262,8 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
+@@ -3263,6 +3263,8 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
  	enum environment_cap env = ENVIRON_ANY;
  	struct regulatory_request *request = NULL, *lr;
  
@@ -220,7 +220,7 @@ index 90297264d8ae..9a2bc5c9f14d 100644
  	/* IE len must be evenly divisible by 2 */
  	if (country_ie_len & 0x01)
  		return;
-@@ -3513,6 +3515,7 @@ static bool is_wiphy_all_set_reg_flag(enum ieee80211_regulatory_flags flag)
+@@ -3514,6 +3516,7 @@ static bool is_wiphy_all_set_reg_flag(enum ieee80211_regulatory_flags flag)
  
  void regulatory_hint_disconnect(void)
  {
@@ -229,10 +229,10 @@ index 90297264d8ae..9a2bc5c9f14d 100644
  	 * ignore IE from connected access point but clearance of beacon hints
  	 * is required when wiphy(s) supports beacon hints.
 -- 
-2.44.0
+2.48.1
 
 
-From 069dd8a653cb009e5f8c4ea404518295912902b2 Mon Sep 17 00:00:00 2001
+From cd434c72a272925a4bbe0d4d4d061e3980579b13 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -270,10 +270,10 @@ index c4bd26e65949..364011e6ee2b 100644
  	{CTRY_UNITED_STATES3, FCC3_FCCA, "US"},
  	/* This "PS" is for US public safety actually... to support this we
 -- 
-2.44.0
+2.48.1
 
 
-From c73955347f36cda64de9bea4ae2eb24c9ea90d56 Mon Sep 17 00:00:00 2001
+From f19e398862afa7d5b1d4eb7ebc4193cb710d1041 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -336,10 +336,10 @@ index 877185bc9987..db1fa65bb65a 100644
  				   REGULATORY_CUSTOM_REG;
  
 -- 
-2.44.0
+2.48.1
 
 
-From 396599b9722c6f4488b0b114035f2bbe9ff01ac2 Mon Sep 17 00:00:00 2001
+From d814df6a7153f9f4c51cc44510b5dec4fbb03c5a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -370,10 +370,10 @@ index d03a36c45f9f..47926c940fa7 100644
  }
  EXPORT_SYMBOL(ath10k_core_register);
 -- 
-2.44.0
+2.48.1
 
 
-From 5ad13a434036a40d588197749337aa5323b0a4c4 Mon Sep 17 00:00:00 2001
+From a37b67d6e22b8628e993f0138bb8933be71bc850 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -396,10 +396,10 @@ index 2ee2c655d599..dbc8aef82a65 100644
  
  /* Refill a bunch of RX buffers for each refill round so that FW/HW can handle
 -- 
-2.44.0
+2.48.1
 
 
-From b9a4809872700f8ac247b4b55798913c684a0418 Mon Sep 17 00:00:00 2001
+From a96e4544ba2c77aa6bbb425cbceda273537ea5c5 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
@@ -484,5 +484,5 @@ index 323b6763cb0f..b6fa0f228da7 100644
  
  			/* FIXME: why use only legacy modes, why not any
 -- 
-2.44.0
+2.48.1
 
