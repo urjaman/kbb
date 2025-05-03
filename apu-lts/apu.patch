@@ -1,4 +1,4 @@
-From 8010f933ba2f35622a88e47e10f9625996e6155b Mon Sep 17 00:00:00 2001
+From e4de291ce7df7d234abf0a88be7715290cdcca3a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -96,10 +96,10 @@ index 20f4f8ea9f89..0c172f3c0646 100644
  				   REGULATORY_CUSTOM_REG;
  
 -- 
-2.48.1
+2.49.0
 
 
-From 2eff6b44ac0342c7f4c9326bb46acf7860ffa85c Mon Sep 17 00:00:00 2001
+From 26587842d7909e60394529cacc9f074ee2f1a6f7 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -195,10 +195,10 @@ index 0c172f3c0646..877185bc9987 100644
  
  static bool dynamic_country_user_possible(struct ath_regulatory *reg)
 -- 
-2.48.1
+2.49.0
 
 
-From e3e417458ee76603e22506b5a61550ebe2b2f4cc Mon Sep 17 00:00:00 2001
+From 784842f7983c1f70389b548ff3952e226529e2ce Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -229,10 +229,10 @@ index 6ab5d8971d10..f08fcab897d9 100644
  	 * ignore IE from connected access point but clearance of beacon hints
  	 * is required when wiphy(s) supports beacon hints.
 -- 
-2.48.1
+2.49.0
 
 
-From 36584d44913a0e78d4726dd8efec5847759b91c2 Mon Sep 17 00:00:00 2001
+From a4b3fb3043923ea0ae3265aacc95c9685676e499 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -270,10 +270,10 @@ index c4bd26e65949..364011e6ee2b 100644
  	{CTRY_UNITED_STATES3, FCC3_FCCA, "US"},
  	/* This "PS" is for US public safety actually... to support this we
 -- 
-2.48.1
+2.49.0
 
 
-From 2db0106bcf387e8946c335b5ac72c4463792fab8 Mon Sep 17 00:00:00 2001
+From 9fce6bc23470327fb9390ed048d0c0eebef23852 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -336,10 +336,10 @@ index 877185bc9987..db1fa65bb65a 100644
  				   REGULATORY_CUSTOM_REG;
  
 -- 
-2.48.1
+2.49.0
 
 
-From c15e00e041140aca6982470e2498ff2231551436 Mon Sep 17 00:00:00 2001
+From c80e933079e42bce7eab4ca6416533cee73e9ca0 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -370,10 +370,10 @@ index d03a36c45f9f..47926c940fa7 100644
  }
  EXPORT_SYMBOL(ath10k_core_register);
 -- 
-2.48.1
+2.49.0
 
 
-From a6c64222d04c347176b91594b82e032cf3b3c4d4 Mon Sep 17 00:00:00 2001
+From 68ac06640650ff201a14c48a64e29ec912663546 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -396,10 +396,10 @@ index 2ee2c655d599..dbc8aef82a65 100644
  
  /* Refill a bunch of RX buffers for each refill round so that FW/HW can handle
 -- 
-2.48.1
+2.49.0
 
 
-From b4ec12430e2198b2900f6fd721e4dedff7ac7351 Mon Sep 17 00:00:00 2001
+From 5c90688f7f8fad89c7fda5ee63a7c49d8182aa10 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
@@ -484,5 +484,5 @@ index 323b6763cb0f..b6fa0f228da7 100644
  
  			/* FIXME: why use only legacy modes, why not any
 -- 
-2.48.1
+2.49.0
 
