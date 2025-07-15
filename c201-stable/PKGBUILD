@@ -14,7 +14,7 @@ pkgbase=linux-c201${_xname}
 _srcname=linux-6.6
 _kernelname=${pkgbase#linux}
 _desc="Veyron Speedy"
-pkgver=6.6.97
+pkgver=6.6.98
 pkgrel=1
 arch=('armv7h')
 url="http://www.kernel.org/"
@@ -165,10 +165,10 @@ for _p in ${pkgname[@]}; do
 done
 
 sha256sums=('d926a06c63dd8ac7df3f86ee1ffc2ce2a3b81a2d168484e76b5b389aba8e56d0'
-            '4ef4e8793c1a350fbad3d8eae756dd70ac36da0cada008734dd550645f86f905'
-            'da5bd07207f6f3f4267bb01e65ee3ae04a70007fb65918e16a651f8db537fd01'
+            '76bf652d88ecd40ae888ac786a268b0a9006b275424feddcac85a8261605d479'
+            '0214bdf8b97658ab01f4889c1a2e7a0be0f51da45b43a1302825b12310d564e6'
             '9e6979121d1f3067561d1fe3e1914a36ac0e06197293a94f09d2405d36698f4a'
             '4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb'
             'bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b'
             'ae2e95db94ef7176207c690224169594d49445e04249d2499e9d2fbc117a0b21'
-            'f4e1bc4f0274ef0b49e442a488003bfdb528dd80369fc2e4cdefd8a771c6a938')
+            '11a758feee7f5dd1152be379a33e94f9eb69e84466e9f6a3433c5a7bd19eb987')
