@@ -1,4 +1,4 @@
-From 67ca6fe657cd6bead5d3f5f5f60eb1f232bd28e0 Mon Sep 17 00:00:00 2001
+From 847e6a27daf3eadf79b3154476906d68e31aa5c5 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -99,7 +99,7 @@ index 20f4f8ea9f89..0c172f3c0646 100644
 2.49.0
 
 
-From dbbb95521c827b1a28e169b543a786fdd444d00e Mon Sep 17 00:00:00 2001
+From 362217a57e34caa0de540250f207e4b412d0fdee Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -198,7 +198,7 @@ index 0c172f3c0646..877185bc9987 100644
 2.49.0
 
 
-From 3c4389d36c78b4a92999035b1f06f9f589c34960 Mon Sep 17 00:00:00 2001
+From fb037aa1fcd7b109a52ab250585854ea65c67838 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -232,7 +232,7 @@ index 6ab5d8971d10..f08fcab897d9 100644
 2.49.0
 
 
-From 37536b7bcff5ca2952c7b8b69ae372d3e625c563 Mon Sep 17 00:00:00 2001
+From 30867b834e87966c0701e54a5f03a3b9f6579719 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -273,7 +273,7 @@ index c4bd26e65949..364011e6ee2b 100644
 2.49.0
 
 
-From 0d7176130d7b155688fca184839e5d1575d50a54 Mon Sep 17 00:00:00 2001
+From 694c84f2519194f770cd7c488d51066e7e969f41 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -339,7 +339,7 @@ index 877185bc9987..db1fa65bb65a 100644
 2.49.0
 
 
-From eb4264a6332fc6896ebbd3c57f3b041de6b65c87 Mon Sep 17 00:00:00 2001
+From 310af529a795775057781b2f9f790e9228fc17f5 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -373,7 +373,7 @@ index a2a52c627672..45bbc8edf2b9 100644
 2.49.0
 
 
-From cd407c7d21660e68343220bfb2477b2674dd5c16 Mon Sep 17 00:00:00 2001
+From b5045f64f08f73639ec3b4cecebef9ba500fceaa Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -399,7 +399,7 @@ index 2ee2c655d599..dbc8aef82a65 100644
 2.49.0
 
 
-From b5ac0bd88802aff3dd7ae55f0a07355596bc6cd0 Mon Sep 17 00:00:00 2001
+From 68ac12ced6d876c01b230b2d1450add925f6781d Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
@@ -409,10 +409,10 @@ Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
  1 file changed, 40 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/wireless/ath/ath10k/mac.c b/drivers/net/wireless/ath/ath10k/mac.c
-index 5dd0239e9d51..30a81d4d8d3c 100644
+index 3a708b3c9d4e..c9f05f45aced 100644
 --- a/drivers/net/wireless/ath/ath10k/mac.c
 +++ b/drivers/net/wireless/ath/ath10k/mac.c
-@@ -1016,6 +1016,40 @@ static inline int ath10k_vdev_setup_sync(struct ath10k *ar)
+@@ -1024,6 +1024,40 @@ static inline int ath10k_vdev_setup_sync(struct ath10k *ar)
  	return ar->last_wmi_vdev_start_status;
  }
  
@@ -453,7 +453,7 @@ index 5dd0239e9d51..30a81d4d8d3c 100644
  static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
  {
  	struct cfg80211_chan_def *chandef = NULL;
-@@ -1048,7 +1082,8 @@ static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
+@@ -1056,7 +1090,8 @@ static int ath10k_monitor_vdev_start(struct ath10k *ar, int vdev_id)
  	arg.channel.min_power = 0;
  	arg.channel.max_power = channel->max_power * 2;
  	arg.channel.max_reg_power = channel->max_reg_power * 2;
@@ -463,7 +463,7 @@ index 5dd0239e9d51..30a81d4d8d3c 100644
  
  	reinit_completion(&ar->vdev_setup_done);
  	reinit_completion(&ar->vdev_delete_done);
-@@ -1494,7 +1529,8 @@ static int ath10k_vdev_start_restart(struct ath10k_vif *arvif,
+@@ -1502,7 +1537,8 @@ static int ath10k_vdev_start_restart(struct ath10k_vif *arvif,
  	arg.channel.min_power = 0;
  	arg.channel.max_power = chandef->chan->max_power * 2;
  	arg.channel.max_reg_power = chandef->chan->max_reg_power * 2;
@@ -473,7 +473,7 @@ index 5dd0239e9d51..30a81d4d8d3c 100644
  
  	if (arvif->vdev_type == WMI_VDEV_TYPE_AP) {
  		arg.ssid = arvif->u.ap.ssid;
-@@ -3265,7 +3301,8 @@ static int ath10k_update_channel_list(struct ath10k *ar)
+@@ -3273,7 +3309,8 @@ static int ath10k_update_channel_list(struct ath10k *ar)
  			ch->min_power = 0;
  			ch->max_power = channel->max_power * 2;
  			ch->max_reg_power = channel->max_reg_power * 2;
