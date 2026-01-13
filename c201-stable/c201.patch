@@ -1,4 +1,4 @@
-From 89b34cdcc75fa26963bbb210e0521b7394d0fefb Mon Sep 17 00:00:00 2001
+From cf38979e2a2e52e50b2752253d8bd4bed16a2181 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 10:30:55 +0000
 Subject: [PATCH 01/15] drivers: clk-rk3288: support for dedicating NPLL to a
@@ -163,10 +163,10 @@ index 758ebaf2236b..7ee324e4186f 100644
  	branch_composite,
  	branch_mux,
 -- 
-2.49.0
+2.52.0
 
 
-From ab0afee8dfcb505284e1eaa8a85e499c75163b75 Mon Sep 17 00:00:00 2001
+From b7cceaf7e5210e228bc75b02b0ab9f7d603e3a6a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Wed, 22 Aug 2018 18:36:40 +0000
 Subject: [PATCH 02/15] drm: dw_hdmi-rockchip: better clock selection logic and
@@ -614,10 +614,10 @@ index aae48e906af1..81f8a82aa5d4 100644
  	drm_encoder_cleanup(&hdmi->encoder.encoder);
  	clk_disable_unprepare(hdmi->ref_clk);
 -- 
-2.49.0
+2.52.0
 
 
-From 4e0d7e6163b93e7864406327dc53ec3ea4f0b201 Mon Sep 17 00:00:00 2001
+From 4e6d18d1ea205d0a6f48d3a5af40dce8392165f4 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:00:50 +0000
 Subject: [PATCH 03/15] dts: rk3288: support for dedicating npll to a vop
@@ -653,10 +653,10 @@ index 8593a8359937..1cfa4eda5abf 100644
  				       <150000000>, <75000000>,
  				       <300000000>, <150000000>,
 -- 
-2.49.0
+2.52.0
 
 
-From 8f73d0588bcd53c2d63ef5ab292a3fa666221b78 Mon Sep 17 00:00:00 2001
+From 3b6ea9d7cd267ca90181d048289a5ddf0f572f6f Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:03:49 +0000
 Subject: [PATCH 04/15] dts: rk3288-veyron-chromebook: dedicate npll to
@@ -746,10 +746,10 @@ index 092316be67f7..e4d5c0240657 100644
  	vcc11-supply = <&vcc_5v>;
  
 -- 
-2.49.0
+2.52.0
 
 
-From bb1a4f6d134c41bc49ebcaace530ec33a2ec106b Mon Sep 17 00:00:00 2001
+From 2a54954498b11b378d7747eb8a35c85bb83531b4 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Sun, 21 Oct 2018 16:40:15 -0500
 Subject: [PATCH 05/15] Added a second reset when having an issue reading the
@@ -799,10 +799,10 @@ index 3564a0f63c9c..fbfc5c628f14 100644
  	 * A successful reset will leave the card in the main partition, but
  	 * upon failure it might not be, so set it to MMC_BLK_PART_INVALID
 -- 
-2.49.0
+2.52.0
 
 
-From bb433be494e955b99c12a3344a8765eb6a9d4bd3 Mon Sep 17 00:00:00 2001
+From ecd45d434d33f8b0248e7503bd3e52a28f44cea4 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 9 Oct 2018 22:01:07 +0200
 Subject: [PATCH 06/15] block: partitions: efi: Ignore bizarre Chromebook GPT
@@ -952,10 +952,10 @@ index 84b9f36b9e47..09726227e891 100644
  #define GPT_PRIMARY_PARTITION_TABLE_LBA 1
  
 -- 
-2.49.0
+2.52.0
 
 
-From 52a9d1101d605423bcc0555743755e8d2b4e9d0e Mon Sep 17 00:00:00 2001
+From 4d672d1ebc690bbcfa687631196170bb75887e8d Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 30 Oct 2018 22:44:54 +0100
 Subject: [PATCH 07/15] mmc: Added a flag to disable cache flush during reset
@@ -1040,10 +1040,10 @@ index 62a6847a3b6f..d80cc06fa2c6 100644
  	int			fixed_drv_type;	/* fixed driver type for non-removable media */
  
 -- 
-2.49.0
+2.52.0
 
 
-From 517f2ef8f40aab950d903d61918ea76ab34f56b5 Mon Sep 17 00:00:00 2001
+From c96e42bba955475d25d807e286756f8bae05ea5e Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Thu, 1 Nov 2018 21:31:26 +0100
 Subject: [PATCH 08/15] arm: dts: veyron: Added a flag to disable cache flush
@@ -1073,10 +1073,10 @@ index d838bf0d5d9a..7aeb70e9b828 100644
  	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
  };
 -- 
-2.49.0
+2.52.0
 
 
-From bf014d40059d4454edf3ee80168df72393594a9d Mon Sep 17 00:00:00 2001
+From 845843f293288f2ce4c9e2ac4f1e720cc8cde378 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 18 Mar 2019 22:40:52 +0000
 Subject: [PATCH 09/15] dwc2 veyron otg mode hack
@@ -1197,10 +1197,10 @@ index 1d72ece9cfe4..3e0a09c14c97 100644
  	/* Create one file for each out endpoint */
  	for (epidx = 0; epidx < hsotg->num_of_eps; epidx++) {
 diff --git a/drivers/usb/dwc2/platform.c b/drivers/usb/dwc2/platform.c
-index c1b7209b9483..6710c401d9a6 100644
+index e80982c817d7..a8bd9178b073 100644
 --- a/drivers/usb/dwc2/platform.c
 +++ b/drivers/usb/dwc2/platform.c
-@@ -532,6 +532,8 @@ static int dwc2_driver_probe(struct platform_device *dev)
+@@ -535,6 +535,8 @@ static int dwc2_driver_probe(struct platform_device *dev)
  	 * other time after this.
  	 */
  	dwc2_force_dr_mode(hsotg);
@@ -1210,10 +1210,10 @@ index c1b7209b9483..6710c401d9a6 100644
  	retval = dwc2_init_params(hsotg);
  	if (retval)
 -- 
-2.49.0
+2.52.0
 
 
-From 99fdafdce042fdccde81b9b6cee623edc8c6fe78 Mon Sep 17 00:00:00 2001
+From 05dc3ea90f91d10dea5082369fe794d704829cee Mon Sep 17 00:00:00 2001
 From: Hal Emmerich <hal@halemmerich.com>
 Date: Wed, 21 Aug 2019 16:52:41 -0500
 Subject: [PATCH 10/15] Fix ath9k dwc2 init frame overruns
@@ -1253,10 +1253,10 @@ index 0d4495c6b9f7..3444cfd35840 100644
  		qh->host_interval = urb->interval * (do_split ? 8 : 1);
  
 -- 
-2.49.0
+2.52.0
 
 
-From 52306621562bb3156c2ba5ab584e97408a1ee88c Mon Sep 17 00:00:00 2001
+From 77be46f4ebdb2111666b09fda10f2b5c9c9b122c Mon Sep 17 00:00:00 2001
 From: barzur <boris@konbu.org>
 Date: Fri, 12 Jul 2019 11:33:32 +0900
 Subject: [PATCH 11/15] usb/dwc2/hcd: channel halt may not be an error
@@ -1324,10 +1324,10 @@ index 5c7538d498dd..96dc5d8115d2 100644
  		}
  	} else {
 -- 
-2.49.0
+2.52.0
 
 
-From cbdd259bb42f2141ed92f27523fd2cb2380d8c78 Mon Sep 17 00:00:00 2001
+From d26279abe6f9d81d6c1aa0591d8c674a64acc6a3 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:03:37 +0000
 Subject: [PATCH 12/15] drm/panel: edp: Extend Innolux N116BGE mode info for
@@ -1371,10 +1371,10 @@ index 53b3b24d7d7c..dd6fdd3d4589 100644
  	.flags = DISPLAY_FLAGS_VSYNC_LOW | DISPLAY_FLAGS_HSYNC_LOW,
  };
 -- 
-2.49.0
+2.52.0
 
 
-From aa829aa286fbf27ef2bffe4a4296ed6c93e8f033 Mon Sep 17 00:00:00 2001
+From 99b19ce82b5cb921c8372f986d3c615f5254723f Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:12:33 +0000
 Subject: [PATCH 13/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
@@ -1410,10 +1410,10 @@ index 32c0f10765dd..ea20818202fc 100644
  			vsync-active = <0>;
  		};
 -- 
-2.49.0
+2.52.0
 
 
-From f641b3a8f055fa05014c509065c57744ea177a79 Mon Sep 17 00:00:00 2001
+From e69b35484f94c55b4d24340b0b8b94e7600de50a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 28 Sep 2021 20:23:13 +0300
 Subject: [PATCH 14/15] Revert "clk: divider: Implement and wire up
@@ -1476,10 +1476,10 @@ index a2c2b5203b0a..9a63a0447d6f 100644
  EXPORT_SYMBOL_GPL(clk_divider_ro_ops);
  
 -- 
-2.49.0
+2.52.0
 
 
-From c75751d622ee7c1f1ae5154b31a3939f93f7b60a Mon Sep 17 00:00:00 2001
+From 032accec833c3bb9656ab619fcc6447d6b7267d6 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 25 Dec 2023 18:06:10 +0200
 Subject: [PATCH 15/15] dts: veyron: bluetooth: disable dma on uart0
@@ -1504,5 +1504,5 @@ index 1cfa4eda5abf..bba671f0de4f 100644
  		pinctrl-0 = <&uart0_xfer>;
  		status = "disabled";
 -- 
-2.49.0
+2.52.0
 
