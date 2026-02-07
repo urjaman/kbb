@@ -2,7 +2,7 @@
 # Hacker: Urja ;P
 
 pkgbase=linux-apu
-pkgver=5.10.248
+pkgver=5.10.249
 pkgrel=1
 pkgdesc='LTS Linux (with APU spice)'
 url="https://www.kernel.org/"
@@ -100,7 +100,7 @@ done
 # vim:set ts=8 sts=2 sw=2 et:
 
 sha256sums=('dcdf99e43e98330d925016985bfbc7b83c66d367b714b2de0cbbfcbf83d8ca43'
-            '00560ec298dd30f55efa3b4871f06b13792e0d9da0ceb733f1f02045b7abcaa7'
-            '93e244aa29db471a04b77a898df92b631856250968921c5552f96c74b274fff6'
-            'ba3ae82f71c7bcb0dca43f7326ae75f756b9e5e0924c3e3d484ad33137f8766e'
+            'b538d1f641e41e9e8ffe8a253fe5fdab684ec7336d75ebdc5cd1a77a50dd8cfe'
+            '462e14f310d8f97c74aeb2e7d49fa6963b7bfa5fbdadba7b56284a78afde45d4'
+            '5ed9361a35e90e6b8a4bc471c37d7303afb3be7c04ba1a36e506b4cc7039d504'
             '082385d0802ab8290564df1f0973ce82cc328bc438bf91abfa5a8df40401e417')
