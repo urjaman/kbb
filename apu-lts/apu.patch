@@ -1,4 +1,4 @@
-From c0b36449b054a177029485027aa67b8bfee19782 Mon Sep 17 00:00:00 2001
+From 62f5dac75200767f81036f1d84f85be7e9abd36c Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:46:54 +0300
 Subject: [PATCH 1/8] 402-ath_regd_optional
@@ -9,7 +9,7 @@ Subject: [PATCH 1/8] 402-ath_regd_optional
  2 files changed, 23 insertions(+)
 
 diff --git a/drivers/net/wireless/ath/Kconfig b/drivers/net/wireless/ath/Kconfig
-index d88edbf1bea3..8525ba2bea97 100644
+index d88edbf1bea38..8525ba2bea97e 100644
 --- a/drivers/net/wireless/ath/Kconfig
 +++ b/drivers/net/wireless/ath/Kconfig
 @@ -23,6 +23,9 @@ config WLAN_VENDOR_ATH
@@ -23,7 +23,7 @@ index d88edbf1bea3..8525ba2bea97 100644
  	bool "Atheros wireless debugging"
  	help
 diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
-index 20f4f8ea9f89..0c172f3c0646 100644
+index 20f4f8ea9f894..0c172f3c06463 100644
 --- a/drivers/net/wireless/ath/regd.c
 +++ b/drivers/net/wireless/ath/regd.c
 @@ -24,6 +24,7 @@
@@ -99,7 +99,7 @@ index 20f4f8ea9f89..0c172f3c0646 100644
 2.54.0
 
 
-From f39b503eb6112da2f190dade999f2ba8bf4ca080 Mon Sep 17 00:00:00 2001
+From 164940e8205d8f83f09716f756f9dcad13d126cd Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:47:56 +0300
 Subject: [PATCH 2/8] 403-world_regd_fixup
@@ -109,7 +109,7 @@ Subject: [PATCH 2/8] 403-world_regd_fixup
  1 file changed, 16 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
-index 0c172f3c0646..877185bc9987 100644
+index 0c172f3c06463..877185bc9987a 100644
 --- a/drivers/net/wireless/ath/regd.c
 +++ b/drivers/net/wireless/ath/regd.c
 @@ -44,7 +44,8 @@ static struct reg_dmn_pair_mapping *ath_get_regpair(int regdmn);
@@ -198,7 +198,7 @@ index 0c172f3c0646..877185bc9987 100644
 2.54.0
 
 
-From 20bb4d8382710ea54d016b64451f7823f7adc36f Mon Sep 17 00:00:00 2001
+From 993485dd52182ff3526efb1e99cbd6c38689ea6a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:48:36 +0300
 Subject: [PATCH 3/8] 404-regd_no_assoc_hints
@@ -208,7 +208,7 @@ Subject: [PATCH 3/8] 404-regd_no_assoc_hints
  1 file changed, 3 insertions(+)
 
 diff --git a/net/wireless/reg.c b/net/wireless/reg.c
-index 6ab5d8971d10..f08fcab897d9 100644
+index 6ab5d8971d10f..f08fcab897d99 100644
 --- a/net/wireless/reg.c
 +++ b/net/wireless/reg.c
 @@ -3263,6 +3263,8 @@ void regulatory_hint_country_ie(struct wiphy *wiphy, enum nl80211_band band,
@@ -232,7 +232,7 @@ index 6ab5d8971d10..f08fcab897d9 100644
 2.54.0
 
 
-From 1752fc2924a24ba1c4a72629bcfa33c70b81c693 Mon Sep 17 00:00:00 2001
+From 1b11ad4068f8940a883d9df84342e2805c3d357a Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:49:11 +0300
 Subject: [PATCH 4/8] 405-ath_regd_us
@@ -242,7 +242,7 @@ Subject: [PATCH 4/8] 405-ath_regd_us
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/net/wireless/ath/regd_common.h b/drivers/net/wireless/ath/regd_common.h
-index c4bd26e65949..364011e6ee2b 100644
+index c4bd26e659490..364011e6ee2b9 100644
 --- a/drivers/net/wireless/ath/regd_common.h
 +++ b/drivers/net/wireless/ath/regd_common.h
 @@ -32,6 +32,7 @@ enum EnumRd {
@@ -273,7 +273,7 @@ index c4bd26e65949..364011e6ee2b 100644
 2.54.0
 
 
-From 062309a5b187f2257c15edd43b5e6c0a06d9abe8 Mon Sep 17 00:00:00 2001
+From 9601b957cf728397e22410736a89dabb02338667 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 13:50:30 +0300
 Subject: [PATCH 5/8] 406-ath_relax_default_regd
@@ -283,7 +283,7 @@ Subject: [PATCH 5/8] 406-ath_relax_default_regd
  1 file changed, 16 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/net/wireless/ath/regd.c b/drivers/net/wireless/ath/regd.c
-index 877185bc9987..db1fa65bb65a 100644
+index 877185bc9987a..db1fa65bb65a0 100644
 --- a/drivers/net/wireless/ath/regd.c
 +++ b/drivers/net/wireless/ath/regd.c
 @@ -115,6 +115,16 @@ static const struct ieee80211_regdomain ath_world_regdom_67_68_6A_6C = {
@@ -339,7 +339,7 @@ index 877185bc9987..db1fa65bb65a 100644
 2.54.0
 
 
-From ba7b99073d67fd1b330dbd6f4e64b4c4c426b427 Mon Sep 17 00:00:00 2001
+From fa21e0deabbd525a0c23b74a720b562e50f610b0 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:41:36 +0300
 Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
@@ -349,7 +349,7 @@ Subject: [PATCH 6/8] 921-ath10k_init_devices_synchronously
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/net/wireless/ath/ath10k/core.c b/drivers/net/wireless/ath/ath10k/core.c
-index a2a52c627672..45bbc8edf2b9 100644
+index a2a52c6276729..45bbc8edf2b92 100644
 --- a/drivers/net/wireless/ath/ath10k/core.c
 +++ b/drivers/net/wireless/ath/ath10k/core.c
 @@ -3245,6 +3245,16 @@ int ath10k_core_register(struct ath10k *ar,
@@ -373,7 +373,7 @@ index a2a52c627672..45bbc8edf2b9 100644
 2.54.0
 
 
-From 88f9266627d035ac96427e1e0a472c75370676a2 Mon Sep 17 00:00:00 2001
+From 04644a517224f33a7afc936f5ec2800a84087a84 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:42:24 +0300
 Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
@@ -383,7 +383,7 @@ Subject: [PATCH 7/8] 922-ath10k-increase-rx-buffer-size-to-2048
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/net/wireless/ath/ath10k/htt.h b/drivers/net/wireless/ath/ath10k/htt.h
-index 2ee2c655d599..dbc8aef82a65 100644
+index 2ee2c655d5991..dbc8aef82a65f 100644
 --- a/drivers/net/wireless/ath/ath10k/htt.h
 +++ b/drivers/net/wireless/ath/ath10k/htt.h
 @@ -2242,7 +2242,7 @@ struct htt_rx_chan_info {
@@ -399,7 +399,7 @@ index 2ee2c655d599..dbc8aef82a65 100644
 2.54.0
 
 
-From 1ec4f62724213aead257d0e4c38ff0fec3effd7b Mon Sep 17 00:00:00 2001
+From 82bad3c98af26158fe43759ec329535b30e899c5 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Thu, 23 Sep 2021 14:43:31 +0300
 Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
@@ -409,7 +409,7 @@ Subject: [PATCH 8/8] 981-ath10k-adjust-tx-power-reduction-for-US-regulatory-d
  1 file changed, 40 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/wireless/ath/ath10k/mac.c b/drivers/net/wireless/ath/ath10k/mac.c
-index 3a708b3c9d4e..c9f05f45aced 100644
+index 3a708b3c9d4ec..c9f05f45aced0 100644
 --- a/drivers/net/wireless/ath/ath10k/mac.c
 +++ b/drivers/net/wireless/ath/ath10k/mac.c
 @@ -1024,6 +1024,40 @@ static inline int ath10k_vdev_setup_sync(struct ath10k *ar)
