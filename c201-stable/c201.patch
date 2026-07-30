@@ -1,4 +1,4 @@
-From ba391aa2d158c6a890ed8dc6169091efc1beb907 Mon Sep 17 00:00:00 2001
+From b7edaca0de0b968b02c333a9deac4ddfab93fa53 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 10:30:55 +0000
 Subject: [PATCH 01/15] drivers: clk-rk3288: support for dedicating NPLL to a
@@ -13,7 +13,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  2 files changed, 60 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/clk/rockchip/clk-rk3288.c b/drivers/clk/rockchip/clk-rk3288.c
-index baa5aebd3277..11493f0be2b1 100644
+index baa5aebd32771..11493f0be2b1d 100644
 --- a/drivers/clk/rockchip/clk-rk3288.c
 +++ b/drivers/clk/rockchip/clk-rk3288.c
 @@ -195,10 +195,14 @@ PNAME(mux_ddrphy_p)		= { "dpll_ddr", "gpll_ddr" };
@@ -149,7 +149,7 @@ index baa5aebd3277..11493f0be2b1 100644
  	if (IS_ERR(ctx)) {
  		pr_err("%s: rockchip clk init failed\n", __func__);
 diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
-index 758ebaf2236b..7ee324e4186f 100644
+index 758ebaf2236bf..7ee324e4186fb 100644
 --- a/drivers/clk/rockchip/clk.h
 +++ b/drivers/clk/rockchip/clk.h
 @@ -510,6 +510,9 @@ struct clk *rockchip_clk_register_muxgrf(const char *name,
@@ -166,7 +166,7 @@ index 758ebaf2236b..7ee324e4186f 100644
 2.54.0
 
 
-From e4724da61721cb6f0e0db51712d5b4caf9820fff Mon Sep 17 00:00:00 2001
+From 31476ca46efea9f6afaf2940a9bbae8e93af450c Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Wed, 22 Aug 2018 18:36:40 +0000
 Subject: [PATCH 02/15] drm: dw_hdmi-rockchip: better clock selection logic and
@@ -199,7 +199,7 @@ Signed-off-by: Maya Matuszczyk <maccraft123mc@gmail.com>
  1 file changed, 166 insertions(+), 113 deletions(-)
 
 diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
-index aae48e906af1..81f8a82aa5d4 100644
+index aae48e906af11..81f8a82aa5d46 100644
 --- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
 +++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
 @@ -80,8 +80,13 @@ struct rockchip_hdmi {
@@ -617,7 +617,7 @@ index aae48e906af1..81f8a82aa5d4 100644
 2.54.0
 
 
-From cbcc63b93d1b5355ab3056ea7c5415f2689d767d Mon Sep 17 00:00:00 2001
+From b14f34ca546c6277f3295c8e358d8517ffa66c2b Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:00:50 +0000
 Subject: [PATCH 03/15] dts: rk3288: support for dedicating npll to a vop
@@ -632,7 +632,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288.dtsi b/arch/arm/boot/dts/rockchip/rk3288.dtsi
-index 8593a8359937..1cfa4eda5abf 100644
+index 8593a83599376..1cfa4eda5abf9 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 @@ -867,12 +867,14 @@
@@ -656,7 +656,7 @@ index 8593a8359937..1cfa4eda5abf 100644
 2.54.0
 
 
-From 72a85c77837ff3d213afca6d7ee4a322162635f1 Mon Sep 17 00:00:00 2001
+From 3e96f753319ef17c3ae0cdedc76e829c321b7614 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 27 Aug 2018 19:03:49 +0000
 Subject: [PATCH 04/15] dts: rk3288-veyron-chromebook: dedicate npll to
@@ -673,7 +673,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 62 insertions(+)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288-veyron-chromebook.dtsi b/arch/arm/boot/dts/rockchip/rk3288-veyron-chromebook.dtsi
-index 092316be67f7..e4d5c0240657 100644
+index 092316be67f74..e4d5c02406579 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288-veyron-chromebook.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288-veyron-chromebook.dtsi
 @@ -83,6 +83,68 @@
@@ -749,7 +749,7 @@ index 092316be67f7..e4d5c0240657 100644
 2.54.0
 
 
-From fb2c94ce401814c33afdd4c0790659917856bdef Mon Sep 17 00:00:00 2001
+From 08875e31a940ea6bd5367e0b7f8b67c0935b3d74 Mon Sep 17 00:00:00 2001
 From: SolidHal <hal@halemmerich.com>
 Date: Sun, 21 Oct 2018 16:40:15 -0500
 Subject: [PATCH 05/15] Added a second reset when having an issue reading the
@@ -772,7 +772,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f53f0bf4ae60..ff08437fb201 100644
+index f53f0bf4ae60c..ff08437fb2018 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
 @@ -1028,6 +1028,7 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
@@ -802,7 +802,7 @@ index f53f0bf4ae60..ff08437fb201 100644
 2.54.0
 
 
-From 6f644016bd7646ea07921891c573f5b7a698df02 Mon Sep 17 00:00:00 2001
+From f777f95a6cc6c42690c66f0d2053a001ce3e9770 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 9 Oct 2018 22:01:07 +0200
 Subject: [PATCH 06/15] block: partitions: efi: Ignore bizarre Chromebook GPT
@@ -842,7 +842,7 @@ Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
  2 files changed, 25 insertions(+), 11 deletions(-)
 
 diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 7acba66eed48..087032a4705e 100644
+index 7acba66eed481..087032a4705e7 100644
 --- a/block/partitions/efi.c
 +++ b/block/partitions/efi.c
 @@ -328,23 +328,34 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
@@ -938,7 +938,7 @@ index 7acba66eed48..087032a4705e 100644
          }
  
 diff --git a/block/partitions/efi.h b/block/partitions/efi.h
-index 84b9f36b9e47..09726227e891 100644
+index 84b9f36b9e479..09726227e8913 100644
 --- a/block/partitions/efi.h
 +++ b/block/partitions/efi.h
 @@ -26,7 +26,8 @@
@@ -955,7 +955,7 @@ index 84b9f36b9e47..09726227e891 100644
 2.54.0
 
 
-From d5704661fa869068910073b40af8f2f862f45648 Mon Sep 17 00:00:00 2001
+From eba0b6b2c7b22e0ac2999e6ddfab70cc36daece3 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Tue, 30 Oct 2018 22:44:54 +0100
 Subject: [PATCH 07/15] mmc: Added a flag to disable cache flush during reset
@@ -978,7 +978,7 @@ Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
  3 files changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index cf396e8f34e9..135cba5d5aa3 100644
+index cf396e8f34e98..135cba5d5aa39 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
 @@ -409,6 +409,8 @@ int mmc_of_parse(struct mmc_host *host)
@@ -991,7 +991,7 @@ index cf396e8f34e9..135cba5d5aa3 100644
  	/* Must be after "non-removable" check */
  	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f5dacb6f9cc8..7c49f9fc3a47 100644
+index f5dacb6f9cc86..7c49f9fc3a478 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
 @@ -2240,6 +2240,12 @@ static int mmc_runtime_resume(struct mmc_host *host)
@@ -1028,7 +1028,7 @@ index f5dacb6f9cc8..7c49f9fc3a47 100644
  	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->card_hw_reset &&
  	     mmc_can_reset(card)) {
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 93b1978f1ca5..f5811c4da5cf 100644
+index 93b1978f1ca54..f5811c4da5cf6 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -427,6 +427,7 @@ struct mmc_host {
@@ -1043,7 +1043,7 @@ index 93b1978f1ca5..f5811c4da5cf 100644
 2.54.0
 
 
-From 3c2e4bf889adf28defdec669f10a66506e975af9 Mon Sep 17 00:00:00 2001
+From 9e555904cf7e0a57304b1e76a2ca289be3d37d1a Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
 Date: Thu, 1 Nov 2018 21:31:26 +0100
 Subject: [PATCH 08/15] arm: dts: veyron: Added a flag to disable cache flush
@@ -1061,7 +1061,7 @@ Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
-index d838bf0d5d9a..7aeb70e9b828 100644
+index d838bf0d5d9a0..7aeb70e9b828b 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 @@ -157,6 +157,7 @@
@@ -1076,7 +1076,7 @@ index d838bf0d5d9a..7aeb70e9b828 100644
 2.54.0
 
 
-From 6a21ac73fa952d040aab334f5ae796f7201484ee Mon Sep 17 00:00:00 2001
+From 2101b04e56946dfaaf56285ad26c09b8c2c1a4be Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 18 Mar 2019 22:40:52 +0000
 Subject: [PATCH 09/15] dwc2 veyron otg mode hack
@@ -1090,7 +1090,7 @@ Subject: [PATCH 09/15] dwc2 veyron otg mode hack
  5 files changed, 55 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
-index 7aeb70e9b828..3d4efa544fce 100644
+index 7aeb70e9b828b..3d4efa544fcee 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288-veyron.dtsi
 @@ -440,8 +440,8 @@
@@ -1104,7 +1104,7 @@ index 7aeb70e9b828..3d4efa544fce 100644
  
  &vopb {
 diff --git a/drivers/usb/dwc2/core.c b/drivers/usb/dwc2/core.c
-index 66080ab8c8e0..8af013b3dde6 100644
+index 66080ab8c8e01..8af013b3dde6d 100644
 --- a/drivers/usb/dwc2/core.c
 +++ b/drivers/usb/dwc2/core.c
 @@ -547,7 +547,7 @@ void dwc2_force_mode(struct dwc2_hsotg *hsotg, bool host)
@@ -1117,7 +1117,7 @@ index 66080ab8c8e0..8af013b3dde6 100644
  	u32 gusbcfg;
  
 diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
-index a141f83aba0c..97bc2297456f 100644
+index a141f83aba0cc..97bc2297456f8 100644
 --- a/drivers/usb/dwc2/core.h
 +++ b/drivers/usb/dwc2/core.h
 @@ -1313,6 +1313,7 @@ int dwc2_phy_init(struct dwc2_hsotg *hsotg, bool select_phy);
@@ -1129,7 +1129,7 @@ index a141f83aba0c..97bc2297456f 100644
  bool dwc2_is_controller_alive(struct dwc2_hsotg *hsotg);
  
 diff --git a/drivers/usb/dwc2/debugfs.c b/drivers/usb/dwc2/debugfs.c
-index 1d72ece9cfe4..3e0a09c14c97 100644
+index 1d72ece9cfe48..3e0a09c14c972 100644
 --- a/drivers/usb/dwc2/debugfs.c
 +++ b/drivers/usb/dwc2/debugfs.c
 @@ -114,6 +114,55 @@ static const struct file_operations testmode_fops = {
@@ -1197,7 +1197,7 @@ index 1d72ece9cfe4..3e0a09c14c97 100644
  	/* Create one file for each out endpoint */
  	for (epidx = 0; epidx < hsotg->num_of_eps; epidx++) {
 diff --git a/drivers/usb/dwc2/platform.c b/drivers/usb/dwc2/platform.c
-index e80982c817d7..a8bd9178b073 100644
+index e80982c817d7d..a8bd9178b0731 100644
 --- a/drivers/usb/dwc2/platform.c
 +++ b/drivers/usb/dwc2/platform.c
 @@ -535,6 +535,8 @@ static int dwc2_driver_probe(struct platform_device *dev)
@@ -1213,7 +1213,7 @@ index e80982c817d7..a8bd9178b073 100644
 2.54.0
 
 
-From 14b7259ce8249e76e05d3e93d39d446ed68b4781 Mon Sep 17 00:00:00 2001
+From 1a6738ff7d3a935b92b8bf48dd662f294bae3f7c Mon Sep 17 00:00:00 2001
 From: Hal Emmerich <hal@halemmerich.com>
 Date: Wed, 21 Aug 2019 16:52:41 -0500
 Subject: [PATCH 10/15] Fix ath9k dwc2 init frame overruns
@@ -1232,7 +1232,7 @@ communicate properly. In my testing this did not impact network speeds.
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/usb/dwc2/hcd_queue.c b/drivers/usb/dwc2/hcd_queue.c
-index 0d4495c6b9f7..3444cfd35840 100644
+index 0d4495c6b9f7b..3444cfd358404 100644
 --- a/drivers/usb/dwc2/hcd_queue.c
 +++ b/drivers/usb/dwc2/hcd_queue.c
 @@ -1528,6 +1528,16 @@ static void dwc2_qh_init(struct dwc2_hsotg *hsotg, struct dwc2_qh *qh,
@@ -1256,7 +1256,7 @@ index 0d4495c6b9f7..3444cfd35840 100644
 2.54.0
 
 
-From 31a9cd602774b3931b7c90a7524e638e61cdd235 Mon Sep 17 00:00:00 2001
+From 442b21f24a4e37ac177347ce6bcd6937b7c97d61 Mon Sep 17 00:00:00 2001
 From: barzur <boris@konbu.org>
 Date: Fri, 12 Jul 2019 11:33:32 +0900
 Subject: [PATCH 11/15] usb/dwc2/hcd: channel halt may not be an error
@@ -1296,7 +1296,7 @@ meantime I'm including it here.
  2 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/usb/dwc2/hcd.c b/drivers/usb/dwc2/hcd.c
-index e0f84726f4b1..78cb7ca7be5f 100644
+index e0f84726f4b1d..78cb7ca7be5f0 100644
 --- a/drivers/usb/dwc2/hcd.c
 +++ b/drivers/usb/dwc2/hcd.c
 @@ -2457,7 +2457,8 @@ static void dwc2_free_dma_aligned_buffer(struct urb *urb)
@@ -1310,7 +1310,7 @@ index e0f84726f4b1..78cb7ca7be5f 100644
  	kfree(urb->transfer_buffer);
  	urb->transfer_buffer = stored_xfer_buffer;
 diff --git a/drivers/usb/dwc2/hcd_intr.c b/drivers/usb/dwc2/hcd_intr.c
-index 5c7538d498dd..96dc5d8115d2 100644
+index 5c7538d498dd1..96dc5d8115d2c 100644
 --- a/drivers/usb/dwc2/hcd_intr.c
 +++ b/drivers/usb/dwc2/hcd_intr.c
 @@ -1935,7 +1935,8 @@ static void dwc2_hc_chhltd_intr_dma(struct dwc2_hsotg *hsotg,
@@ -1327,7 +1327,7 @@ index 5c7538d498dd..96dc5d8115d2 100644
 2.54.0
 
 
-From 8ebe25e6d0d304f4391a9369c92327de825a2a14 Mon Sep 17 00:00:00 2001
+From 4fabee0ad8c9c9a9cfa7696aec07b40c3784a3ce Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:03:37 +0000
 Subject: [PATCH 12/15] drm/panel: edp: Extend Innolux N116BGE mode info for
@@ -1339,7 +1339,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/gpu/drm/panel/panel-edp.c b/drivers/gpu/drm/panel/panel-edp.c
-index 53b3b24d7d7c..dd6fdd3d4589 100644
+index 53b3b24d7d7c0..dd6fdd3d45891 100644
 --- a/drivers/gpu/drm/panel/panel-edp.c
 +++ b/drivers/gpu/drm/panel/panel-edp.c
 @@ -1309,16 +1309,25 @@ static const struct panel_desc innolux_n116bca_ea1 = {
@@ -1374,7 +1374,7 @@ index 53b3b24d7d7c..dd6fdd3d4589 100644
 2.54.0
 
 
-From 8f71e4ffdf0c3349d342349aaefbc7d86b7964cb Mon Sep 17 00:00:00 2001
+From 1a10244a3816a3c2c83b58a97ca7c5a2ebf60222 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 8 Oct 2019 11:12:33 +0000
 Subject: [PATCH 13/15] ARM: dts: rockchip: Adjust rk3288-veyron n116bge mode
@@ -1390,7 +1390,7 @@ Signed-off-by: Urja Rannikko <urjaman@gmail.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288-veyron-edp.dtsi b/arch/arm/boot/dts/rockchip/rk3288-veyron-edp.dtsi
-index 32c0f10765dd..ea20818202fc 100644
+index 32c0f10765dd3..ea20818202fce 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288-veyron-edp.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288-veyron-edp.dtsi
 @@ -62,13 +62,13 @@
@@ -1413,7 +1413,7 @@ index 32c0f10765dd..ea20818202fc 100644
 2.54.0
 
 
-From bbed852c3b737007e31eacf2a4f0aa75589c8115 Mon Sep 17 00:00:00 2001
+From 9eddf399c1a76575cb65f7d32bb2acfe64a34932 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Tue, 28 Sep 2021 20:23:13 +0300
 Subject: [PATCH 14/15] Revert "clk: divider: Implement and wire up
@@ -1428,7 +1428,7 @@ in my tree to be able to test the rest of 5.15 rc's.
  1 file changed, 23 deletions(-)
 
 diff --git a/drivers/clk/clk-divider.c b/drivers/clk/clk-divider.c
-index a2c2b5203b0a..9a63a0447d6f 100644
+index a2c2b5203b0a9..9a63a0447d6fe 100644
 --- a/drivers/clk/clk-divider.c
 +++ b/drivers/clk/clk-divider.c
 @@ -446,27 +446,6 @@ static long clk_divider_round_rate(struct clk_hw *hw, unsigned long rate,
@@ -1479,7 +1479,7 @@ index a2c2b5203b0a..9a63a0447d6f 100644
 2.54.0
 
 
-From cfdfb3442c23845a9d41c2788371267c00f6fd6f Mon Sep 17 00:00:00 2001
+From 5c6cb8e987f24854c878addcad4ac3abe1742804 Mon Sep 17 00:00:00 2001
 From: Urja Rannikko <urjaman@gmail.com>
 Date: Mon, 25 Dec 2023 18:06:10 +0200
 Subject: [PATCH 15/15] dts: veyron: bluetooth: disable dma on uart0
@@ -1491,7 +1491,7 @@ https://codeberg.org/petms/linux-veyron-patches-and-apkbuild
  1 file changed, 2 deletions(-)
 
 diff --git a/arch/arm/boot/dts/rockchip/rk3288.dtsi b/arch/arm/boot/dts/rockchip/rk3288.dtsi
-index 1cfa4eda5abf..bba671f0de4f 100644
+index 1cfa4eda5abf9..bba671f0de4fb 100644
 --- a/arch/arm/boot/dts/rockchip/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rockchip/rk3288.dtsi
 @@ -378,8 +378,6 @@
